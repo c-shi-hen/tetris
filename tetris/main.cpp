@@ -7,4 +7,5 @@ int main()
 	_getch();				// 按任意键继续
 	closegraph();			// 关闭绘图窗口
 	return 0;
+
 }
