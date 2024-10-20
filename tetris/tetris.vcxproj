@@ -130,7 +130,15 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Begin_frame.cpp" />
+    <ClCompile Include="Block.cpp" />
+    <ClCompile Include="Frame.cpp" />
     <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Begin_frame.h" />
+    <ClInclude Include="Block.h" />
+    <ClInclude Include="Frame.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

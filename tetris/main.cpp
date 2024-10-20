@@ -1,11 +1,24 @@
-#include <graphics.h>		// 引用图形库头文件
-#include <conio.h>
+#include<easyx.h>
+#include"Frame.h"
+#include"Begin_frame.h"
 int main()
 {
-	initgraph(1000, 1000);	// 创建绘图窗口，大小为 640x480 像素
-	rectangle(100, 100, 600, 600);
-	circle(200, 200, 100);	// 画圆，圆心(200, 200)，半径 100
-	_getch();				// 按任意键继续
-	closegraph();			// 关闭绘图窗口
+	Begin_frame* my_begin_frame = new Begin_frame();
+	initgraph( my_begin_frame->begin_frame_width, my_begin_frame->begin_frame_height);
+	my_begin_frame->initial();
+	closegraph();
+	Frame* myFrame = new Frame(my_begin_frame->default_map_size.map_width, my_begin_frame->default_map_size.map_height);
+	initgraph(myFrame->frame_width, myFrame->frame_height);
+	BeginBatchDraw();
+	myFrame->begin();
+	while (true){
+
+		FlushBatchDraw();
+		Sleep(1000 / 60);
+	}
+	EndBatchDraw();
+	closegraph();
+	delete(myFrame);
+	delete(my_begin_frame);
 	return 0;
 }

@@ -38,8 +38,6 @@ void set_x_axis(Message button_down);
 **未注明均为public成员和方法**  
 成员列表
 ```  
-//窗口实例
-Frame.main
 //窗口大小
 Frame.size{
 	//貌似有专门的结构体
