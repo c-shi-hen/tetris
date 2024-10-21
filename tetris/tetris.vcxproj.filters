@@ -41,5 +41,33 @@
     <ClInclude Include="Begin_frame.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="tetris.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="C:\Users\chenshi\Desktop\blue.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="C:\Users\chenshi\Desktop\green.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="C:\Users\chenshi\Desktop\light_blue.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="C:\Users\chenshi\Desktop\orange.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="C:\Users\chenshi\Desktop\purple.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="C:\Users\chenshi\Desktop\yellow.png">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

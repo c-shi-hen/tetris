@@ -139,6 +139,18 @@
     <ClInclude Include="Begin_frame.h" />
     <ClInclude Include="Block.h" />
     <ClInclude Include="Frame.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="tetris.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="C:\Users\chenshi\Desktop\blue.png" />
+    <Image Include="C:\Users\chenshi\Desktop\green.png" />
+    <Image Include="C:\Users\chenshi\Desktop\light_blue.png" />
+    <Image Include="C:\Users\chenshi\Desktop\orange.png" />
+    <Image Include="C:\Users\chenshi\Desktop\purple.png" />
+    <Image Include="C:\Users\chenshi\Desktop\yellow.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
