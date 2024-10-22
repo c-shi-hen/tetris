@@ -51,22 +51,25 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="C:\Users\chenshi\Desktop\blue.png">
+    <Image Include="background.png">
       <Filter>资源文件</Filter>
     </Image>
-    <Image Include="C:\Users\chenshi\Desktop\green.png">
+    <Image Include="blue.png">
       <Filter>资源文件</Filter>
     </Image>
-    <Image Include="C:\Users\chenshi\Desktop\light_blue.png">
+    <Image Include="green.png">
       <Filter>资源文件</Filter>
     </Image>
-    <Image Include="C:\Users\chenshi\Desktop\orange.png">
+    <Image Include="light_blue.png">
       <Filter>资源文件</Filter>
     </Image>
-    <Image Include="C:\Users\chenshi\Desktop\purple.png">
+    <Image Include="orange.png">
       <Filter>资源文件</Filter>
     </Image>
-    <Image Include="C:\Users\chenshi\Desktop\yellow.png">
+    <Image Include="purple.png">
+      <Filter>资源文件</Filter>
+    </Image>
+    <Image Include="yellow.png">
       <Filter>资源文件</Filter>
     </Image>
   </ItemGroup>

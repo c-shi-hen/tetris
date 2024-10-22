@@ -145,12 +145,13 @@
     <ResourceCompile Include="tetris.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="C:\Users\chenshi\Desktop\blue.png" />
-    <Image Include="C:\Users\chenshi\Desktop\green.png" />
-    <Image Include="C:\Users\chenshi\Desktop\light_blue.png" />
-    <Image Include="C:\Users\chenshi\Desktop\orange.png" />
-    <Image Include="C:\Users\chenshi\Desktop\purple.png" />
-    <Image Include="C:\Users\chenshi\Desktop\yellow.png" />
+    <Image Include="background.png" />
+    <Image Include="blue.png" />
+    <Image Include="green.png" />
+    <Image Include="light_blue.png" />
+    <Image Include="orange.png" />
+    <Image Include="purple.png" />
+    <Image Include="yellow.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

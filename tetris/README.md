@@ -8,10 +8,11 @@
 **未注明均为public成员和方法，方法参数未定**  
 成员列表
 ```  
-//方块颜色
+//方块颜色，使用图片替换
 Block.color
 //方块大小
-Block.length
+const static int block_width = 50;
+const static int block_height = 50;
 //方块速度
 Block.speed
 //方块坐标
