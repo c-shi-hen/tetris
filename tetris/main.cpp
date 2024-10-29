@@ -4,11 +4,12 @@
 int main()
 {
 	Begin_frame* my_begin_frame = new Begin_frame();
-	initgraph( my_begin_frame->begin_frame_width, my_begin_frame->begin_frame_height);
+	SetWindowText(initgraph( my_begin_frame->begin_frame_width, my_begin_frame->begin_frame_height), L"俄罗斯方块");
 	my_begin_frame->initial();
 	closegraph();
+
 	Frame* myFrame = new Frame(my_begin_frame->default_map_size.map_width, my_begin_frame->default_map_size.map_height);
-	initgraph(myFrame->frame_width, myFrame->frame_height);
+	SetWindowText(initgraph(myFrame->frame_width, myFrame->frame_height), L"俄罗斯方块");
 	BeginBatchDraw();
 	myFrame->begin();
 	while (true){
@@ -20,5 +21,6 @@ int main()
 	closegraph();
 	delete(myFrame);
 	delete(my_begin_frame);
+
 	return 0;
 }

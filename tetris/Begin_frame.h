@@ -1,4 +1,5 @@
 #pragma once
+#include<easyx.h>
 struct map_size
 {
 	int map_width;
@@ -16,5 +17,6 @@ public:
 	const int begin_frame_height = 640;
 	const map_size default_map_size = { 20, 10 };
 private:
-	
+	IMAGE background;
+	void inline draw_backgroud();
 };

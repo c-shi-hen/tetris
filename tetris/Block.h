@@ -10,6 +10,7 @@ public:
 	const static int block_height = 50;
 	int row;
 	int column;
+	bool is_block = false;
 private:
 
 };
