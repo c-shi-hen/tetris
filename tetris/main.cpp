@@ -11,7 +11,7 @@ int main()
 	Frame* myFrame = new Frame(my_begin_frame->default_map_size.map_width, my_begin_frame->default_map_size.map_height);
 	SetWindowText(initgraph(myFrame->frame_width, myFrame->frame_height), L"俄罗斯方块");
 	BeginBatchDraw();
-	myFrame->begin();
+	myFrame->game_begin();
 	while (true){
 
 		FlushBatchDraw();

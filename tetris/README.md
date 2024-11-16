@@ -4,6 +4,8 @@
 
 基于面向对象实现，实现方块类 `Block`和框架类`Frame`
 
+**未更新，可直接看源文件**
+
 ### `Block` 类
 **未注明均为public成员和方法，方法参数未定**  
 成员列表
@@ -15,11 +17,11 @@ const static int block_width = 50;
 const static int block_height = 50;
 //方块速度
 Block.speed
-//方块坐标
-Block.x_axis
-Block.y_axis
-//方块状态，是否正在下落
-Block.is_fall
+//方块位置
+Block.row
+Block.column
+//是否存在方块
+Block.is_block
 //ect ???
 ```
 方法列表  
@@ -28,10 +30,10 @@ Block.is_fall
 Block();
 //析构函数
 ~Block();
-//根据键盘下和当前速度改变y_axis位置
-void set_y_axis();
-//根据键盘左右改变x_axis位置
-void set_x_axis(Message button_down);
+//绘制方块
+void show();
+//加载方块图片
+void load_image();_
 //ect ???
 ```
 
@@ -41,19 +43,11 @@ void set_x_axis(Message button_down);
 ```  
 //窗口大小
 Frame.size{
-	//貌似有专门的结构体
+	//貌似有专门的结构体,暂时未用
 	int width;
 	int height;
 }
-//格子大小,考虑方块的大小
-Frame.grid_size
-//格子数目，row，column
-Frame.row
-Frame.column
-//格子矩阵，储存方块
-Frame.matrix
-//储存当前下落格子，使用vector?
-Frame.falling_block
+
 //ect ???
 ```
 方法列表  
@@ -65,7 +59,7 @@ Frame();
 //生成初始界面
 void init_frame();
 //检测是否出现整行
-void is_full_row();
+void check_line_();
 //事件响应
 如何实现，easyx使用
 //游戏开始

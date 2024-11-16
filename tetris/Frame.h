@@ -27,7 +27,7 @@ public:
 	/*
 	* @brief 开始游戏
 	*/
-	void begin();
+	void game_begin();
 
 	/*
 	* @brief 获得下一个方块组合，
@@ -45,24 +45,57 @@ public:
 	*/
 	void check_line();
 
+	/*
+	* @brief 消除满足条件的行，且只下落一次
+	* @param row : 行数
+	*/
+	void erase_line(int row);
+
+	/*
+	* @brief 检查是否出现碰撞，也即下落停止位置
+	*/
+	void check_crash();
+
 public:
+
+	//菜单的宽度
 	int menu_width;
+	//菜单的长度
 	int menu_height;
+
+	//界面的宽度
 	int frame_width;
+	//界面的长度
 	int frame_height;
+
+	//地图的宽度，即能容纳的方块数目
 	int map_width;
+	//地图的宽度，即能容纳的方块数目
 	int map_height;
+
+	//储存时间消息
 	ExMessage message;
+
+	//按下的按键
+	int button_down;
+
+	//方块矩阵
 	std::vector<std::vector<Block*>> block;
 
+	//当前下落方块组合
+	std::vector<Block*> block_group;
+
 private:
+	//背景照片
 	IMAGE background;
-	IMAGE block_group[7];
+	//方块组合照片
+	IMAGE block_group_png[7];
+	
 	enum blcok_group
 	{
 		S, Z, L, J, I, O, T//方块组合，待定，仍可添加，顺序和加载方块图片的顺序一致
 	};
-	int button_down;
+
 private:
 
 	/*
@@ -74,5 +107,9 @@ private:
 	* @brief 初始化方块，即生成方块对象
 	*/
 	void initial_block();
+
+	/*
+	* @brief加载图片
+	*/
 	void load_image();
 };

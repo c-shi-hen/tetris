@@ -2,7 +2,6 @@
 #include"Block.h"
 #include<random>
 
-
 Frame::Frame(int map_width, int map_height) {
 	//获得地图参数
 	this->map_height = map_height;
@@ -25,7 +24,7 @@ Frame::~Frame() {
 
 }
 
-void Frame::begin() {
+void Frame::game_begin() {
 	draw_backgroud();
 }
 
@@ -34,15 +33,20 @@ void Frame::get_next_block_group() {
 	std::random_device rd;  // 用于获取随机数种子
 	std::mt19937 gen(rd()); // Mersenne Twister 19937 演算法生成器
 	// 设置随机数分布范围
-	int start = 1;
-	int end = 7;
+	int start = 0;
+	int end = 6;
 	std::uniform_int_distribution<> dis(start, end); // 均匀分布
 	// 生成随机数
-	int randomInteger = dis(gen);
-	switch (randomInteger - 1){
-	case S: 
-	default:
-		break;
+	int block_group_shape = dis(gen);
+	switch (block_group_shape){
+	case S: break;
+	case Z: break; 
+	case L: break;
+	case J: break; 
+	case I: break; 
+	case O: break;
+	case T: break;
+	default:break;
 	}
 }
 
@@ -75,8 +79,61 @@ void Frame::get_message(ExMessage& message) {
 	}
 }
 
-void Frame::check_line() {
+void Frame::check_crash() {
+	bool flag = true;
+	for (int i = 0; i < block_group.size(); i++) {
+		//下方为地图边界特殊处理
+		if (block_group[i]->row == map_height - 1) {
+			flag = false;
+			break;
+		}
+		else {
+			int row_next = block_group[i]->row + 1;
+			int column_next = block_group[i]->column;
+			if (block[row_next][column_next]->is_block = true) {
+				flag = false;
+				break;
+			}
+		}
+	}
+	//检查到碰撞，下落停止
+	if (flag == false) {
+		//检查是否可以消除
+		check_line();
+	}
+}
 
+void Frame::check_line() {
+	for (int i = 0; i < map_height; i++) {
+		bool flag = true;
+		for (int j = 0; j < map_width; j++) {
+			if (block[i][j]->is_block = false) {
+				flag = false;
+				break;
+			}
+		}
+		if (flag) {
+			erase_line(i);
+			break;
+		}
+	}
+}
+
+void Frame::erase_line(int row) {
+	//第一行特殊处理
+	if (row == 0) {
+		for (int i = 0; i < map_width; i++) {
+			block[row][i]->is_block = false;
+		}
+	}
+	else {
+		//上一行下落，传递必要参数
+		for (int i = 0; i < map_width; i++) {
+			block[row][i]->is_block = block[row - 1][i]->is_block;
+			block[row][i]->color = block[row - 1][i]->color;
+		}
+	}
+	
 }
 
 void inline Frame::draw_backgroud() {
@@ -99,11 +156,11 @@ void Frame::load_image()
 	//加载背景图片
 	loadimage(&background, _T("../res/background.png"));
 	//加载方块组合照片,顺序和方块组合的顺序一致
-	loadimage(&block_group[0], _T("../res/S.png"));
-	loadimage(&block_group[1], _T("../res/Z.png"));
-	loadimage(&block_group[2], _T("../res/L.png"));
-	loadimage(&block_group[3], _T("../res/J.png"));
-	loadimage(&block_group[4], _T("../res/I.png"));
-	loadimage(&block_group[5], _T("../res/O.png"));
-	loadimage(&block_group[6], _T("../res/T.png"));
+	loadimage(&block_group_png[0], _T("../res/S.png"));
+	loadimage(&block_group_png[1], _T("../res/Z.png"));
+	loadimage(&block_group_png[2], _T("../res/L.png"));
+	loadimage(&block_group_png[3], _T("../res/J.png"));
+	loadimage(&block_group_png[4], _T("../res/I.png"));
+	loadimage(&block_group_png[5], _T("../res/O.png"));
+	loadimage(&block_group_png[6], _T("../res/T.png"));
 }
