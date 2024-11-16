@@ -1,4 +1,5 @@
 #pragma once
+#include<easyx.h>
 class Block
 {
 public:
@@ -12,5 +13,8 @@ public:
 	int column;
 	bool is_block = false;
 private:
-
+	IMAGE block_png[6];
+public:
+	// 加载方块图片
+	void load_iamge();
 };

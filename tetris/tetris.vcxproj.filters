@@ -45,32 +45,4 @@
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="tetris.rc">
-      <Filter>资源文件</Filter>
-    </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="background.png">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="blue.png">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="green.png">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="light_blue.png">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="orange.png">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="purple.png">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="yellow.png">
-      <Filter>资源文件</Filter>
-    </Image>
-  </ItemGroup>
 </Project>

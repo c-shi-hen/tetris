@@ -15,8 +15,8 @@ Frame::Frame(int map_width, int map_height) {
 	message = {};
 	//生成方块
 	initial_block();
-	//加载背景图片
-	loadimage(&background, _T("background.png"));
+	//加载图片
+	load_image();
 	//初始化消息
 	button_down = NON_BUTTON;
 }
@@ -29,11 +29,7 @@ void Frame::begin() {
 	draw_backgroud();
 }
 
-void Frame::generate_block_group() {
-	enum blcok_group
-	{
-		S,Z,L,J,I,O,T
-	};
+void Frame::get_next_block_group() {
 	// 创建随机数生成引擎
 	std::random_device rd;  // 用于获取随机数种子
 	std::mt19937 gen(rd()); // Mersenne Twister 19937 演算法生成器
@@ -95,4 +91,19 @@ void inline Frame::initial_block(){
 		}
 		block.push_back(block_line);
 	}
+}
+
+
+void Frame::load_image()
+{
+	//加载背景图片
+	loadimage(&background, _T("../res/background.png"));
+	//加载方块组合照片,顺序和方块组合的顺序一致
+	loadimage(&block_group[0], _T("../res/S.png"));
+	loadimage(&block_group[1], _T("../res/Z.png"));
+	loadimage(&block_group[2], _T("../res/L.png"));
+	loadimage(&block_group[3], _T("../res/J.png"));
+	loadimage(&block_group[4], _T("../res/I.png"));
+	loadimage(&block_group[5], _T("../res/O.png"));
+	loadimage(&block_group[6], _T("../res/T.png"));
 }

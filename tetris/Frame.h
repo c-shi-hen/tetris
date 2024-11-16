@@ -2,7 +2,6 @@
 #include <wtypes.h>
 #include"Block.h"
 #include <vector>
-#include<easyx.h>
 
 //定义按下的方向键
 #define NON_BUTTON 0
@@ -31,9 +30,9 @@ public:
 	void begin();
 
 	/*
-	* @brief 生成方块组合，
+	* @brief 获得下一个方块组合，
 	*/
-	void generate_block_group();
+	void get_next_block_group();
 
 	/*
 	* @brief 获得玩家操作信息
@@ -58,6 +57,11 @@ public:
 
 private:
 	IMAGE background;
+	IMAGE block_group[7];
+	enum blcok_group
+	{
+		S, Z, L, J, I, O, T//方块组合，待定，仍可添加，顺序和加载方块图片的顺序一致
+	};
 	int button_down;
 private:
 
@@ -70,4 +74,5 @@ private:
 	* @brief 初始化方块，即生成方块对象
 	*/
 	void initial_block();
+	void load_image();
 };
