@@ -15,9 +15,13 @@ Block::~Block(){
 }
 
 void Block::show() {
-	int x_axis = block_width * column;
-	int y_axis = block_height * row;
-	putimage(x_axis, y_axis, &block_png[color]);
+	//确保存在方块
+	if (is_block) {
+		int x_axis = block_width * column;
+		int y_axis = block_height * row;
+		putimage(x_axis, y_axis, &block_png[color]);
+	}
+
 }
 
 // 加载方块图片

@@ -56,6 +56,26 @@ public:
 	*/
 	void check_crash();
 
+	/*
+	*@brief 刷新游戏界面
+	*/
+	void renew_frame();
+
+	/*
+	*@brief 绘制方块
+	*/
+	void draw_block();
+
+	/*
+	*@brief 显示得分
+	*/
+	void draw_score();
+
+	/*
+	*@brief 显示下一个方块组合的照片
+	*/
+	void draw_block_group_png();
+
 public:
 
 	//菜单的宽度
@@ -84,6 +104,23 @@ public:
 
 	//当前下落方块组合
 	std::vector<Block*> block_group;
+	std::vector<Block*> next_block_group;
+	
+	//下一个方块组合字符表示的index
+	int next_block_group_png;
+	//方块组合图片显示的坐标
+	int next_group_block_x_axis;
+	int next_group_block_y_axis;
+
+	//玩家得分
+	int score;
+
+	//得分坐标
+	int score_x_axis;
+	int score_y_axis;
+
+	//下落速度
+	int speed;
 
 private:
 	//背景照片
@@ -109,7 +146,7 @@ private:
 	void initial_block();
 
 	/*
-	* @brief加载图片
+	* @brief 加载图片
 	*/
 	void load_image();
 };

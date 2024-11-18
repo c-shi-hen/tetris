@@ -12,11 +12,6 @@ int main()
 	SetWindowText(initgraph(myFrame->frame_width, myFrame->frame_height), L"俄罗斯方块");
 	BeginBatchDraw();
 	myFrame->game_begin();
-	while (true){
-
-		FlushBatchDraw();
-		Sleep(1000 / 60);
-	}
 	EndBatchDraw();
 	closegraph();
 	delete(myFrame);
