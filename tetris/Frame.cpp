@@ -61,20 +61,98 @@ void Frame::get_next_block_group() {
 	int end = 6;
 	std::uniform_int_distribution<> dis(start, end); // 均匀分布
 	// 生成随机数
+	rewnew_block_group();
 	int block_group_shape = dis(gen);
 	next_block_group_png = block_group_shape;
-	switch (block_group_shape){
-	case S: break;
-	case Z: break;
-	case L: break;
-	case J: break;
-	case I: break;
-	case O: break;
-	case T: break;
-	default:
-		//程序出错，直接退出
-		exit(0);
+	switch (block_group_shape) {
+	case S: {
+		int color = BLOCK_GREEN;
+		block_group[0][1]->is_block = true;
+		block_group[0][1]->color = color;
+		block_group[0][2]->is_block = true;
+		block_group[0][2]->color = color;
+		block_group[1][0]->is_block = true;
+		block_group[1][0]->color = color;
+		block_group[1][1]->is_block = true;
+		block_group[1][1]->color = color;
 		break;
+	}
+	case Z: {
+		int color = BLOCK_GREEN;
+		block_group[0][1]->is_block = true;
+		block_group[0][1]->color = color;
+		block_group[0][2]->is_block = true;
+		block_group[0][2]->color = color;
+		block_group[1][0]->is_block = true;
+		block_group[1][0]->color = color;
+		block_group[1][1]->is_block = true;
+		block_group[1][1]->color = color;
+		break;
+	}
+	case L: {
+		int color = BLOCK_GREEN;
+		block_group[0][1]->is_block = true;
+		block_group[0][1]->color = color;
+		block_group[0][2]->is_block = true;
+		block_group[0][2]->color = color;
+		block_group[1][0]->is_block = true;
+		block_group[1][0]->color = color;
+		block_group[1][1]->is_block = true;
+		block_group[1][1]->color = color;
+		break;
+	}
+	case J: {
+		int color = BLOCK_GREEN;
+		block_group[0][1]->is_block = true;
+		block_group[0][1]->color = color;
+		block_group[0][2]->is_block = true;
+		block_group[0][2]->color = color;
+		block_group[1][0]->is_block = true;
+		block_group[1][0]->color = color;
+		block_group[1][1]->is_block = true;
+		block_group[1][1]->color = color;
+		break;
+	}
+	case I: {
+		int color = BLOCK_GREEN;
+		block_group[0][1]->is_block = true;
+		block_group[0][1]->color = color;
+		block_group[0][2]->is_block = true;
+		block_group[0][2]->color = color;
+		block_group[1][0]->is_block = true;
+		block_group[1][0]->color = color;
+		block_group[1][1]->is_block = true;
+		block_group[1][1]->color = color;
+		break;
+	}
+	case O: {
+		int color = BLOCK_GREEN;
+		block_group[0][1]->is_block = true;
+		block_group[0][1]->color = color;
+		block_group[0][2]->is_block = true;
+		block_group[0][2]->color = color;
+		block_group[1][0]->is_block = true;
+		block_group[1][0]->color = color;
+		block_group[1][1]->is_block = true;
+		block_group[1][1]->color = color;
+		break;
+	}
+	case T: {
+		int color = BLOCK_GREEN;
+		block_group[0][1]->is_block = true;
+		block_group[0][1]->color = color;
+		block_group[0][2]->is_block = true;
+		block_group[0][2]->color = color;
+		block_group[1][0]->is_block = true;
+		block_group[1][0]->color = color;
+		block_group[1][1]->is_block = true;
+		block_group[1][1]->color = color;
+		break;
+	}
+	default:
+			//程序出错，直接退出
+			exit(0);
+			break;
 	}
 }
 
@@ -120,21 +198,8 @@ void Frame::get_message(ExMessage& message) {
 
 void Frame::check_crash() {
 	bool flag = true;
-	for (int i = 0; i < block_group.size(); i++) {
-		//下方为地图边界特殊处理
-		if (block_group[i]->row == map_height - 1) {
-			flag = false;
-			break;
-		}
-		else {
-			int row_next = block_group[i]->row + 1;
-			int column_next = block_group[i]->column;
-			if (block[row_next][column_next]->is_block = true) {
-				flag = false;
-				break;
-			}
-		}
-	}
+	//单独检测每一个方块会不会出现碰撞
+	
 	//检查到碰撞，下落停止
 	if (flag == false) {
 		//检查是否可以消除
@@ -249,4 +314,67 @@ void Frame::load_image()
 	loadimage(&block_group_png[4], _T("../res/I.png"));
 	loadimage(&block_group_png[5], _T("../res/O.png"));
 	loadimage(&block_group_png[6], _T("../res/T.png"));
+}
+
+void Frame::rewnew_block_group() {
+	for (int i = 0; i < 4; i++) {
+		std::vector<Block*> temp_line;
+		for (int j = map_width / 2 - 1; j < map_width / 2 + 3; j++) {
+			temp_line.push_back(block[i][j]);
+		}
+		block_group.push_back(temp_line);
+	}
+}
+
+// 向左移动方块
+void Frame::moveLeft() {
+	
+}
+
+// 向右移动方块
+void Frame::moveRight() {
+	
+}
+
+// 向下移动方块
+void Frame::moveDown() {
+	
+}
+
+
+// 检查是否与其他方块发生碰撞
+//暂时只实现了是否会超出地图边界的检测
+//之后可能需要定义一个二维数组，其中每个元素表示一个位置。如果某个位置有方块，它会指向一个方块对象。如果没有方块，则为 nullptr
+bool Frame::checkCollision(int targetRow, int targetColumn) {
+	
+	return false;
+}
+
+// 旋转方块（顺时针90度）
+void Frame::rotate() {
+	//int temp[4][4];
+
+	//// 将当前的形状复制到临时数组
+	//for (int i = 0; i < 4; ++i) {
+	//	for (int j = 0; j < 4; ++j) {
+	//		temp[i][j] = block_group[i][j];
+	//	}
+	//}
+
+	//// 顺时针旋转90度
+	//for (int i = 0; i < 4; ++i) {
+	//	for (int j = 0; j < 4; ++j) {
+	//		block_group[i][j] = temp[3 - j][i];
+	//	}
+	//}
+
+	//// 检查旋转后的方块是否与其他方块发生碰撞
+	//if (checkCollision(row, column)) {
+	//	// 如果发生碰撞，恢复到原始状态
+	//	for (int i = 0; i < 4; ++i) {
+	//		for (int j = 0; j < 4; ++j) {
+	//			block_group[i][j] = temp[i][j];
+	//		}
+	//	}
+	//}
 }

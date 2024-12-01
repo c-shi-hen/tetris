@@ -76,6 +76,17 @@ public:
 	*/
 	void draw_block_group_png();
 
+	// 控制方块移动（左、右、下）
+	void moveLeft();
+	void moveRight();
+	void moveDown();
+
+	// 旋转方块
+	void rotate();
+
+	// 检查目标位置是否有碰撞
+	bool checkCollision(int targetRow, int targetColumn);
+
 public:
 
 	//菜单的宽度
@@ -103,11 +114,11 @@ public:
 	std::vector<std::vector<Block*>> block;
 
 	//当前下落方块组合
-	std::vector<Block*> block_group;
-	std::vector<Block*> next_block_group;
+	std::vector<std::vector<Block*>> block_group;
 	
 	//下一个方块组合字符表示的index
 	int next_block_group_png;
+
 	//方块组合图片显示的坐标
 	int next_group_block_x_axis;
 	int next_group_block_y_axis;
@@ -149,4 +160,9 @@ private:
 	* @brief 加载图片
 	*/
 	void load_image();
+
+	/*
+	* @brief 更新block_group
+	*/
+	void rewnew_block_group();
 };
