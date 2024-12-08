@@ -40,6 +40,7 @@ public:
 	*/
 	void get_message(ExMessage& message);
 
+
 	/*
 	* @brief 检查是否可以消除
 	*/
@@ -76,10 +77,11 @@ public:
 	*/
 	void draw_block_group_png();
 
-	// 控制方块移动（左、右、下）
+	// 控制方块移动（左、右、下、最下）
 	void moveLeft();
 	void moveRight();
 	void moveDown();
+	void moveToLowestPosition();
 
 	// 旋转方块
 	void rotate();

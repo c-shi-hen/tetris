@@ -43,9 +43,9 @@ void Frame::game_begin() {
 	//绘制得分
 	draw_score();
 	//生成第二个方块组合
-	get_next_block_group();
+	//get_next_block_group();
 	//绘制下一个方块组合的图片
-	draw_block_group_png();
+	//draw_block_group_png();
 	//显示
 	FlushBatchDraw();
 	//开始get消息
@@ -79,50 +79,51 @@ void Frame::get_next_block_group() {
 	}
 	case Z: {
 		int color = BLOCK_GREEN;
+		block_group[0][0]->is_block = true;
+		block_group[0][0]->color = color;
 		block_group[0][1]->is_block = true;
 		block_group[0][1]->color = color;
-		block_group[0][2]->is_block = true;
-		block_group[0][2]->color = color;
-		block_group[1][0]->is_block = true;
-		block_group[1][0]->color = color;
 		block_group[1][1]->is_block = true;
 		block_group[1][1]->color = color;
+		block_group[1][2]->is_block = true;
+		block_group[1][2]->color = color;
 		break;
 	}
 	case L: {
 		int color = BLOCK_GREEN;
-		block_group[0][1]->is_block = true;
-		block_group[0][1]->color = color;
-		block_group[0][2]->is_block = true;
-		block_group[0][2]->color = color;
+		block_group[0][0]->is_block = true;
+		block_group[0][0]->color = color;
 		block_group[1][0]->is_block = true;
 		block_group[1][0]->color = color;
 		block_group[1][1]->is_block = true;
 		block_group[1][1]->color = color;
+		block_group[1][2]->is_block = true;
+		block_group[1][2]->color = color;
 		break;
 	}
 	case J: {
 		int color = BLOCK_GREEN;
-		block_group[0][1]->is_block = true;
-		block_group[0][1]->color = color;
 		block_group[0][2]->is_block = true;
 		block_group[0][2]->color = color;
 		block_group[1][0]->is_block = true;
 		block_group[1][0]->color = color;
 		block_group[1][1]->is_block = true;
 		block_group[1][1]->color = color;
+		block_group[1][2]->is_block = true;
+		block_group[1][2]->color = color;
 		break;
 	}
+
 	case I: {
 		int color = BLOCK_GREEN;
 		block_group[0][1]->is_block = true;
 		block_group[0][1]->color = color;
-		block_group[0][2]->is_block = true;
-		block_group[0][2]->color = color;
-		block_group[1][0]->is_block = true;
-		block_group[1][0]->color = color;
 		block_group[1][1]->is_block = true;
 		block_group[1][1]->color = color;
+		block_group[2][1]->is_block = true;
+		block_group[2][1]->color = color;
+		block_group[3][1]->is_block = true;
+		block_group[3][1]->color = color;
 		break;
 	}
 	case O: {
@@ -131,20 +132,20 @@ void Frame::get_next_block_group() {
 		block_group[0][1]->color = color;
 		block_group[0][2]->is_block = true;
 		block_group[0][2]->color = color;
-		block_group[1][0]->is_block = true;
-		block_group[1][0]->color = color;
 		block_group[1][1]->is_block = true;
 		block_group[1][1]->color = color;
+		block_group[1][2]->is_block = true;
+		block_group[1][2]->color = color;
 		break;
 	}
 	case T: {
 		int color = BLOCK_GREEN;
+		block_group[0][0]->is_block = true;
+		block_group[0][0]->color = color;
 		block_group[0][1]->is_block = true;
 		block_group[0][1]->color = color;
 		block_group[0][2]->is_block = true;
 		block_group[0][2]->color = color;
-		block_group[1][0]->is_block = true;
-		block_group[1][0]->color = color;
 		block_group[1][1]->is_block = true;
 		block_group[1][1]->color = color;
 		break;
@@ -184,6 +185,23 @@ void Frame::get_message(ExMessage& message) {
 		else if (message.message == WM_NCLBUTTONUP) {
 
 		}
+
+		if (button_down == UP) {
+			rotate();
+		}
+
+		if (button_down == DOWN) {
+			moveDown();
+		}
+
+		if (button_down == LEFT) {
+			moveLeft();
+		}
+
+		if (button_down == RIGHT) {
+			moveRight();
+		}
+
 		//刷新
 		renew_frame();
 		//结束时间
@@ -326,55 +344,181 @@ void Frame::rewnew_block_group() {
 	}
 }
 
-// 向左移动方块
-void Frame::moveLeft() {
-	
-}
+// 以行列偏移量（deltaRow, deltaColumn）为参数，用于在移动或旋转方块之前进行检测。
+// 当准备向某个方向（左、右、下）移动或在旋转后变换坐标时，
+// 只需根据新坐标计算出相对于当前坐标的偏移（或新位置），然后调用该函数检查是否有碰撞。
+bool Frame::checkCollision(int deltaRow, int deltaColumn) {
+	// 遍历当前下落方块组合中的所有块
+	for (auto& row_vec : block_group) {
+		for (auto& b : row_vec) {
+			if (b->is_block) {
+				int targetRow = b->row + deltaRow;
+				int targetColumn = b->column + deltaColumn;
 
-// 向右移动方块
-void Frame::moveRight() {
-	
-}
+				// 检查是否越界
+				if (targetRow < 0 || targetRow >= map_height || targetColumn < 0 || targetColumn >= map_width) {
+					return true; // 越界表示碰撞
+				}
 
-// 向下移动方块
-void Frame::moveDown() {
-	
-}
+				// 检查该位置是否已被固定方块占据
+				if (block[targetRow][targetColumn]->is_block) {
+					return true; // 已有方块占据，碰撞
+				}
+			}
+		}
+	}
 
-
-// 检查是否与其他方块发生碰撞
-//暂时只实现了是否会超出地图边界的检测
-//之后可能需要定义一个二维数组，其中每个元素表示一个位置。如果某个位置有方块，它会指向一个方块对象。如果没有方块，则为 nullptr
-bool Frame::checkCollision(int targetRow, int targetColumn) {
-	
+	// 如果所有激活方块检测后均无问题，则表示无碰撞
 	return false;
 }
 
-// 旋转方块（顺时针90度）
-void Frame::rotate() {
-	//int temp[4][4];
 
-	//// 将当前的形状复制到临时数组
-	//for (int i = 0; i < 4; ++i) {
-	//	for (int j = 0; j < 4; ++j) {
-	//		temp[i][j] = block_group[i][j];
-	//	}
-	//}
 
-	//// 顺时针旋转90度
-	//for (int i = 0; i < 4; ++i) {
-	//	for (int j = 0; j < 4; ++j) {
-	//		block_group[i][j] = temp[3 - j][i];
-	//	}
-	//}
+void Frame::moveLeft() {
+	// 检查向左移动是否有碰撞
+	// deltaRow = 0, deltaColumn = -1 表示尝试向左一格的位置
+	if (checkCollision(0, -1)) {
+		// 有碰撞则直接返回，不移动
+		return;
+	}
 
-	//// 检查旋转后的方块是否与其他方块发生碰撞
-	//if (checkCollision(row, column)) {
-	//	// 如果发生碰撞，恢复到原始状态
-	//	for (int i = 0; i < 4; ++i) {
-	//		for (int j = 0; j < 4; ++j) {
-	//			block_group[i][j] = temp[i][j];
-	//		}
-	//	}
-	//}
+	// 无碰撞，可以左移
+	for (auto& row_vec : block_group) {
+		for (auto& b : row_vec) {
+			if (b->is_block) {
+				b->column -= 1; // 左移一格
+			}
+		}
+	}
 }
+
+void Frame::moveRight() {
+	// 检查向右移动是否有碰撞
+	// deltaRow = 0, deltaColumn = 1 表示尝试向右一格的位置
+	if (checkCollision(0, 1)) {
+		// 有碰撞则直接返回，不移动
+		return;
+	}
+
+	// 无碰撞，可以右移
+	for (auto& row_vec : block_group) {
+		for (auto& b : row_vec) {
+			if (b->is_block) {
+				b->column += 1; // 右移一格
+			}
+		}
+	}
+}
+
+
+
+void Frame::moveDown() {
+	// 检查向下移动是否有碰撞
+	// deltaRow = 1, deltaColumn = 0 表示尝试向下移动一格的位置
+	if (checkCollision(1, 0)) {
+		// 有碰撞则直接返回，不移动
+		return;
+	}
+
+	// 无碰撞，可以下移
+	for (auto& row_vec : block_group) {
+		for (auto& b : row_vec) {
+			if (b->is_block) {
+				b->row += 1; // 下移一格
+			}
+		}
+	}
+}
+
+
+
+
+void Frame::rotate()
+{
+	// 以 block_group[1][1] 为旋转中心点
+	int centerRow = block_group[1][1]->row;
+	int centerCol = block_group[1][1]->column;
+
+	// 收集当前下落方块组合中所有激活的方块
+	std::vector<Block*> activeBlocks;
+	for (auto& row_vec : block_group)
+	{
+		for (auto& b : row_vec)
+		{
+			if (b->is_block)
+			{
+				activeBlocks.push_back(b);
+			}
+		}
+	}
+
+	// 计算旋转后的位置
+	std::vector<std::pair<int, int>> rotatedPositions;
+	rotatedPositions.reserve(activeBlocks.size());
+	for (auto b : activeBlocks)
+	{
+		int relR = b->row - centerRow;
+		int relC = b->column - centerCol;
+
+		// 顺时针90度旋转公式：
+		// (relR, relC) -> (-relC, relR)
+		int newR = centerRow - relC;
+		int newC = centerCol + relR;
+
+		// 越界检测
+		if (newR < 0 || newR >= map_height || newC < 0 || newC >= map_width)
+		{
+			// 如果越界则不旋转，直接返回
+			return;
+		}
+
+		// 检测是否与已存在的固定方块重叠
+		if (block[newR][newC]->is_block)
+		{
+			// 已被占用，不旋转
+			return;
+		}
+
+		rotatedPositions.push_back(std::make_pair(newR, newC));
+	}
+
+	// 如果能执行到这里，说明旋转后的所有位置都有效
+	// 清除当前 block_group 中所有方块的 is_block 标记
+	for (auto& row_vec : block_group)
+	{
+		for (auto& b : row_vec)
+		{
+			b->is_block = false;
+		}
+	}
+
+	// 更新方块到旋转后的位置
+	for (size_t i = 0; i < activeBlocks.size(); i++)
+	{
+		Block* b = activeBlocks[i];
+		b->row = rotatedPositions[i].first;
+		b->column = rotatedPositions[i].second;
+		b->is_block = true;
+	}
+}
+
+
+void Frame::moveToLowestPosition()
+{
+	// 不断检测方块是否可以继续向下移动一格
+	while (!checkCollision(1, 0))
+	{
+		// 如果无碰撞，则将所有处于激活状态的方块向下移动一格
+		for (auto& row_vec : block_group)
+		{
+			for (auto& b : row_vec)
+			{
+				if (b->is_block)
+				{
+					b->row += 1; // 向下移动一格
+				}
+			}
+		}
+	}
+}
+
