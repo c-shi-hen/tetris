@@ -130,12 +130,14 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Animation.cpp" />
     <ClCompile Include="Begin_frame.cpp" />
     <ClCompile Include="Block.cpp" />
     <ClCompile Include="Frame.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Animation.h" />
     <ClInclude Include="Begin_frame.h" />
     <ClInclude Include="Block.h" />
     <ClInclude Include="Frame.h" />

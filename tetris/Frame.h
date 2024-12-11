@@ -2,13 +2,14 @@
 #include <wtypes.h>
 #include"Block.h"
 #include <vector>
+#include"Animation.h"
 
-//定义按下的方向键
-#define NON_BUTTON 0
-#define LEFT 1
-#define RIGHT 2
-#define UP 3
-#define DOWN 4
+
+#define VK_W 0x57
+#define VK_S 0x53
+#define VK_A 0x41
+#define VK_D 0x44
+
 
 class Frame
 {
@@ -17,7 +18,7 @@ public:
 	* @brief 游戏初始化时构造，主函数中调用一次
 	* @param map_width: 横向可容纳方块的数量，map_height:纵向可容纳方块的数量
 	*/
-	Frame(int map_width, int map_height);
+	Frame(int map_width, int map_height, Animation* animation);
 
 	/*
 	* @brief 游戏结束后调用，主函数中析构
@@ -28,11 +29,6 @@ public:
 	* @brief 开始游戏
 	*/
 	void game_begin();
-
-	/*
-	* @brief 获得下一个方块组合，
-	*/
-	void get_next_block_group();
 
 	/*
 	* @brief 获得玩家操作信息
@@ -51,11 +47,6 @@ public:
 	* @param row : 行数
 	*/
 	void erase_line(int row);
-
-	/*
-	* @brief 检查是否出现碰撞，也即下落停止位置
-	*/
-	void check_crash();
 
 	/*
 	*@brief 刷新游戏界面
@@ -78,16 +69,17 @@ public:
 	void draw_block_group_png();
 
 	// 控制方块移动（左、右、下、最下）
-	void moveLeft();
-	void moveRight();
-	void moveDown();
-	void moveToLowestPosition();
+	bool moveLeft();
+	bool moveRight();
+	bool moveDown();
+	bool moveToLowestPosition();
 
 	// 旋转方块
 	void rotate();
 
 	// 检查目标位置是否有碰撞
 	bool checkCollision(int targetRow, int targetColumn);
+
 
 public:
 
@@ -109,17 +101,23 @@ public:
 	//储存时间消息
 	ExMessage message;
 
-	//按下的按键
-	int button_down;
+	//W,A,S,D,SPACE各个按键的状态
+	bool is_up;
+	bool is_down;
+	bool is_left;
+	bool is_right;
+	bool is_space;
 
 	//方块矩阵
 	std::vector<std::vector<Block*>> block;
 
 	//当前下落方块组合
 	std::vector<std::vector<Block*>> block_group;
+	//下一个方块组合
+	std::vector<std::vector<Block*>> next_block_group;
 	
-	//下一个方块组合字符表示的index
-	int next_block_group_png;
+	//方块组合字符表示的index
+	int block_group_png_index;
 
 	//方块组合图片显示的坐标
 	int next_group_block_x_axis;
@@ -133,13 +131,20 @@ public:
 	int score_y_axis;
 
 	//下落速度
-	int speed;
+	int SPEED;
+
+	//时间
+	int time;
+
+
 
 private:
+	//图片资源指针
+	Animation* animation;
 	//背景照片
-	IMAGE background;
+	IMAGE* background;
 	//方块组合照片
-	IMAGE block_group_png[7];
+	std::vector<IMAGE*>* block_group_png;
 	
 	enum blcok_group
 	{
@@ -159,12 +164,25 @@ private:
 	void initial_block();
 
 	/*
-	* @brief 加载图片
+	* @brief 生成方块组合
 	*/
-	void load_image();
+	void generate_block_group();
 
 	/*
 	* @brief 更新block_group
 	*/
 	void rewnew_block_group();
+
+	/*
+	* @brief 在方块落地后，将next_block_group传递给block_group
+	*/
+	void trans_block_group();
+
+	/*
+	* @brief 方块组合落地
+	*/
+	void block_group_ground();
+
+	//释放方块组合的内存
+	void delete_block_group();
 };

@@ -30,6 +30,9 @@
     <ClCompile Include="Begin_frame.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Animation.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Block.h">
@@ -42,6 +45,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

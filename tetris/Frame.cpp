@@ -1,8 +1,9 @@
 #include"Frame.h"
 #include"Block.h"
 #include<random>
+#include<iostream>
 
-Frame::Frame(int map_width, int map_height) {
+Frame::Frame(int map_width, int map_height, Animation* animation) {
 	//获得地图参数
 	this->map_height = map_height;
 	this->map_width = map_width;
@@ -10,20 +11,33 @@ Frame::Frame(int map_width, int map_height) {
 	menu_height = map_height * Block::block_height;
 	frame_width = map_width * Block::block_width + menu_width;
 	frame_height = map_height * Block::block_height;
-	//加载图片
-	load_image();
+
+	//获取图片资源
+	this->animation = animation;
+	this->background = &animation->back_ground;
+	this->block_group_png = &animation->block_group_png;
+
 	//初始化消息
 	message = {};
-	button_down = NON_BUTTON;
+	is_up = false;
+	is_down = false;
+	is_left = false;
+	is_right = false;
+	is_space = false;
+
 	//初始化得分
 	score = 0;
+
 	//初始化得分坐标
 	score_x_axis = 0;
 	score_y_axis = 0;
+
 	//初始化速度
-	speed = 1;
+	SPEED = 1;
+
 	//生成方块
 	initial_block();
+
 	//初始化方块组合图片的坐标
 	next_group_block_x_axis = 10;
 	next_group_block_y_axis = 10;
@@ -34,25 +48,39 @@ Frame::~Frame() {
 }
 
 void Frame::game_begin() {
-	//生成第一个方块
-	get_next_block_group();
+	//生成第一个方块组合
+	generate_block_group();
+
+	//由于当前不存在方块组合，因此立即传递一个
+	trans_block_group();
+
 	//绘制背景
 	draw_backgroud();
+
 	//绘制方块
 	draw_block();
+
 	//绘制得分
 	draw_score();
+
 	//生成第二个方块组合
-	//get_next_block_group();
+	generate_block_group();
+
 	//绘制下一个方块组合的图片
-	//draw_block_group_png();
+	draw_block_group_png();
+
 	//显示
 	FlushBatchDraw();
+
 	//开始get消息
 	get_message(message);
 }
 
-void Frame::get_next_block_group() {
+void Frame::generate_block_group() {
+
+	//刷新block_group
+	rewnew_block_group();
+
 	// 创建随机数生成引擎
 	std::random_device rd;  // 用于获取随机数种子
 	std::mt19937 gen(rd()); // Mersenne Twister 19937 演算法生成器
@@ -61,93 +89,96 @@ void Frame::get_next_block_group() {
 	int end = 6;
 	std::uniform_int_distribution<> dis(start, end); // 均匀分布
 	// 生成随机数
-	rewnew_block_group();
 	int block_group_shape = dis(gen);
-	next_block_group_png = block_group_shape;
+
+	//存储下生成的随机数对应的方块组合图片
+	block_group_png_index = block_group_shape;
+
+	//根据随机数生成方块组合
 	switch (block_group_shape) {
 	case S: {
 		int color = BLOCK_GREEN;
-		block_group[0][1]->is_block = true;
-		block_group[0][1]->color = color;
-		block_group[0][2]->is_block = true;
-		block_group[0][2]->color = color;
-		block_group[1][0]->is_block = true;
-		block_group[1][0]->color = color;
-		block_group[1][1]->is_block = true;
-		block_group[1][1]->color = color;
+		next_block_group[0][1]->is_block = true;
+		next_block_group[0][1]->color = color;
+		next_block_group[0][2]->is_block = true;
+		next_block_group[0][2]->color = color;
+		next_block_group[1][0]->is_block = true;
+		next_block_group[1][0]->color = color;
+		next_block_group[1][1]->is_block = true;
+		next_block_group[1][1]->color = color;
 		break;
 	}
 	case Z: {
 		int color = BLOCK_GREEN;
-		block_group[0][0]->is_block = true;
-		block_group[0][0]->color = color;
-		block_group[0][1]->is_block = true;
-		block_group[0][1]->color = color;
-		block_group[1][1]->is_block = true;
-		block_group[1][1]->color = color;
-		block_group[1][2]->is_block = true;
-		block_group[1][2]->color = color;
+		next_block_group[0][0]->is_block = true;
+		next_block_group[0][0]->color = color;
+		next_block_group[0][1]->is_block = true;
+		next_block_group[0][1]->color = color;
+		next_block_group[1][1]->is_block = true;
+		next_block_group[1][1]->color = color;
+		next_block_group[1][2]->is_block = true;
+		next_block_group[1][2]->color = color;
 		break;
 	}
 	case L: {
 		int color = BLOCK_GREEN;
-		block_group[0][0]->is_block = true;
-		block_group[0][0]->color = color;
-		block_group[1][0]->is_block = true;
-		block_group[1][0]->color = color;
-		block_group[1][1]->is_block = true;
-		block_group[1][1]->color = color;
-		block_group[1][2]->is_block = true;
-		block_group[1][2]->color = color;
+		next_block_group[0][0]->is_block = true;
+		next_block_group[0][0]->color = color;
+		next_block_group[1][0]->is_block = true;
+		next_block_group[1][0]->color = color;
+		next_block_group[1][1]->is_block = true;
+		next_block_group[1][1]->color = color;
+		next_block_group[1][2]->is_block = true;
+		next_block_group[1][2]->color = color;
 		break;
 	}
 	case J: {
 		int color = BLOCK_GREEN;
-		block_group[0][2]->is_block = true;
-		block_group[0][2]->color = color;
-		block_group[1][0]->is_block = true;
-		block_group[1][0]->color = color;
-		block_group[1][1]->is_block = true;
-		block_group[1][1]->color = color;
-		block_group[1][2]->is_block = true;
-		block_group[1][2]->color = color;
+		next_block_group[0][2]->is_block = true;
+		next_block_group[0][2]->color = color;
+		next_block_group[1][0]->is_block = true;
+		next_block_group[1][0]->color = color;
+		next_block_group[1][1]->is_block = true;
+		next_block_group[1][1]->color = color;
+		next_block_group[1][2]->is_block = true;
+		next_block_group[1][2]->color = color;
 		break;
 	}
 
 	case I: {
 		int color = BLOCK_GREEN;
-		block_group[0][1]->is_block = true;
-		block_group[0][1]->color = color;
-		block_group[1][1]->is_block = true;
-		block_group[1][1]->color = color;
-		block_group[2][1]->is_block = true;
-		block_group[2][1]->color = color;
-		block_group[3][1]->is_block = true;
-		block_group[3][1]->color = color;
+		next_block_group[0][1]->is_block = true;
+		next_block_group[0][1]->color = color;
+		next_block_group[1][1]->is_block = true;
+		next_block_group[1][1]->color = color;
+		next_block_group[2][1]->is_block = true;
+		next_block_group[2][1]->color = color;
+		next_block_group[3][1]->is_block = true;
+		next_block_group[3][1]->color = color;
 		break;
 	}
 	case O: {
 		int color = BLOCK_GREEN;
-		block_group[0][1]->is_block = true;
-		block_group[0][1]->color = color;
-		block_group[0][2]->is_block = true;
-		block_group[0][2]->color = color;
-		block_group[1][1]->is_block = true;
-		block_group[1][1]->color = color;
-		block_group[1][2]->is_block = true;
-		block_group[1][2]->color = color;
+		next_block_group[0][1]->is_block = true;
+		next_block_group[0][1]->color = color;
+		next_block_group[0][2]->is_block = true;
+		next_block_group[0][2]->color = color;
+		next_block_group[1][1]->is_block = true;
+		next_block_group[1][1]->color = color;
+		next_block_group[1][2]->is_block = true;
+		next_block_group[1][2]->color = color;
 		break;
 	}
 	case T: {
 		int color = BLOCK_GREEN;
-		block_group[0][0]->is_block = true;
-		block_group[0][0]->color = color;
-		block_group[0][1]->is_block = true;
-		block_group[0][1]->color = color;
-		block_group[0][2]->is_block = true;
-		block_group[0][2]->color = color;
-		block_group[1][1]->is_block = true;
-		block_group[1][1]->color = color;
+		next_block_group[0][0]->is_block = true;
+		next_block_group[0][0]->color = color;
+		next_block_group[0][1]->is_block = true;
+		next_block_group[0][1]->color = color;
+		next_block_group[0][2]->is_block = true;
+		next_block_group[0][2]->color = color;
+		next_block_group[1][1]->is_block = true;
+		next_block_group[1][1]->color = color;
 		break;
 	}
 	default:
@@ -158,48 +189,89 @@ void Frame::get_next_block_group() {
 }
 
 void Frame::get_message(ExMessage& message) {
+
+	//下降速度过快，引入计时器，满足gap(5)再下落
+	int timer = 0;
+
 	while (true) {
+
+		timer++;
 		//动态延时优化性能，保证每次循环执行的时间高于帧率
 		//开始时间
 		ULONGLONG begin_time = GetTickCount64();
-		getmessage(&message , -1);
-		if (message.message == WM_KEYDOWN) {
-			//确保按下第二个键时第一个键已经松开
-			if (!button_down) {
+		while (peekmessage(&message)) {
+			std::cout << "get keydown" << toascii(message.vkcode) << std::endl;
+			if (message.message == WM_KEYDOWN) {
+				//每个按键单独处理
 				switch (message.vkcode){
-				case VK_UP: button_down = UP; break;
-				case VK_DOWN: button_down = DOWN; break;
-				case VK_LEFT: button_down = LEFT; break;
-				case VK_RIGHT: button_down = RIGHT; break;
+				case VK_W: {
+					is_up = true;
+					break;
+				}
+				case VK_S: {
+					is_down = true;
+				}
+				case VK_A: {
+					if (!is_right) {
+						is_left = true;
+					}
+					break;
+				}
+				case VK_D: {
+					if (!is_left) {
+						is_right = true;
+					}
+					break;
+				}
+				case VK_SPACE: {
+					is_space = true;
+					break;
+				}
+				default:
+					break;
+				}
+			}
+			else if (message.message == WM_KEYUP) {
+				switch (message.vkcode) {
+				case VK_W: {
+					is_up = false;
+					break;
+				}
+				case VK_S: {
+					is_down = false;
+					//松下按键后刷新速度
+					SPEED = 1;
+				}
+				case VK_A: {
+					is_left = false;
+					break;
+				}
+				case VK_D: {
+					is_right = false;
+				}
+				case VK_SPACE: {
+					is_space = false;
+					break;
+				}
 				default:
 					break;
 				}
 			}
 		}
-		else if (message.message == WM_KEYUP) {
-			button_down = NON_BUTTON;
-		}
-		else if (message.message == WM_LBUTTONDOWN) {
+		
 
-		}
-		else if (message.message == WM_NCLBUTTONUP) {
+		//每个按键的消息单独处理
+		if (is_left) moveLeft();
+		if (is_right) moveRight();
+		if (is_up) rotate();
+		if (is_down) SPEED++;
+		if (is_space) moveToLowestPosition();
 
-		}
-
-		if (button_down == UP) {
-			rotate();
-		}
-
-		if (button_down == DOWN) {
+		//下落SPEED行
+		
+		if (timer % 10 == 0) {
 			moveDown();
-		}
-
-		if (button_down == LEFT) {
-			moveLeft();
-		}
-
-		if (button_down == RIGHT) {
-			moveRight();
+			timer %= 5;
 		}
 
 		//刷新
@@ -211,17 +283,6 @@ void Frame::get_message(ExMessage& message) {
 		if (run_time < 1000 / 60) {
 			Sleep(1000 / 60 - run_time);
 		}
-	}
-}
-
-void Frame::check_crash() {
-	bool flag = true;
-	//单独检测每一个方块会不会出现碰撞
-	
-	//检查到碰撞，下落停止
-	if (flag == false) {
-		//检查是否可以消除
-		check_line();
 	}
 }
 
@@ -257,17 +318,17 @@ void Frame::erase_line(int row) {
 	}
 }
 
-
-
 void inline Frame::draw_backgroud() {
-	putimage(0, 0, &background);
+	putimage(0, 0, this->background);
 }
 
 void inline Frame::initial_block(){
 	for (int i = 0; i < map_height; i++) {
 		std::vector<Block*> block_line;
 		for (int j = 0; j < map_width; j++) {
-			block_line.push_back(new Block(i ,j));
+			Block* temp = new Block(i, j, &this->animation->block_png);
+			temp->is_block = false;
+			block_line.push_back(temp);
 		}
 		block.push_back(block_line);
 	}
@@ -276,25 +337,44 @@ void inline Frame::initial_block(){
 void Frame::renew_frame() {
 	//清除界面
 	cleardevice();
+
 	//绘制背景
 	draw_backgroud();
+
 	//绘制方块
 	draw_block();
+
 	//绘制得分
 	draw_score();
+
 	//绘制下一个方块组合的图片
 	draw_block_group_png();
+
 	//显示
 	FlushBatchDraw();
 }
 
 
 void Frame::draw_block() {
+	//绘制棋盘本身
+	std::cout << "------------------------" << std::endl;
+	std::cout << "block" << std::endl;
 	for (int i = 0; i < map_height; i++) {
 		for (int j = 0; j < map_width; j++) {
 			block[i][j]->show();
 		}
 	}
+	std::cout << "------------------------" << std::endl;
+	//绘制当前下落组合
+	std::cout << "------------------------" << std::endl;
+	std::cout << "block_group" << std::endl;
+	std::cout << "------------------------" << std::endl;
+	for (auto& x : block_group) {
+		for (auto& y : x) {
+			y->show();
+		}
+	}
+	std::cout << "------------------------" << std::endl;
 }
 
 void Frame::draw_score() {
@@ -317,31 +397,55 @@ void Frame::draw_score() {
 }
 
 void Frame::draw_block_group_png() {
-	putimage(next_group_block_x_axis, next_group_block_y_axis, &block_group_png[next_block_group_png]);
-}
-
-void Frame::load_image()
-{
-	//加载背景图片
-	loadimage(&background, _T("../res/background.png"));
-	//加载方块组合照片,顺序和方块组合的顺序一致
-	loadimage(&block_group_png[0], _T("../res/S.png"));
-	loadimage(&block_group_png[1], _T("../res/Z.png"));
-	loadimage(&block_group_png[2], _T("../res/L.png"));
-	loadimage(&block_group_png[3], _T("../res/J.png"));
-	loadimage(&block_group_png[4], _T("../res/I.png"));
-	loadimage(&block_group_png[5], _T("../res/O.png"));
-	loadimage(&block_group_png[6], _T("../res/T.png"));
+	putimage(next_group_block_x_axis, next_group_block_y_axis, block_group_png->at(block_group_png_index));
 }
 
 void Frame::rewnew_block_group() {
 	for (int i = 0; i < 4; i++) {
 		std::vector<Block*> temp_line;
 		for (int j = map_width / 2 - 1; j < map_width / 2 + 3; j++) {
-			temp_line.push_back(block[i][j]);
+			Block* temp = new Block(i, j, &this->animation->block_png);
+			temp->is_block = false;
+			temp_line.push_back(temp);
+		}
+		next_block_group.push_back(temp_line);
+	}
+}
+
+void Frame::delete_block_group() {
+	for (int i = 0; i < block_group.size(); i++) {
+		for (int j = 0; j < block_group[i].size(); j++) {
+			delete block_group[i][j];
+		}
+		block_group[i].clear();
+	}
+	block_group.clear();
+}
+
+void Frame::trans_block_group() {
+	for (int i = 0; i < next_block_group.size();  i++) {
+		std::vector<Block*> temp_line;
+		for (int j = 0; j < next_block_group[i].size(); j++) {
+			temp_line.push_back(next_block_group[i][j]);
 		}
 		block_group.push_back(temp_line);
 	}
+	//传递之后自身被清空
+	next_block_group.clear();
+}
+
+void Frame::block_group_ground() {
+	//先检查是否可以消除
+	check_line();
+
+	//释放block_group
+	delete_block_group();
+
+	//立刻传递新的组合
+	trans_block_group();
+
+	//生成下一个组合
+	generate_block_group();
 }
 
 // 以行列偏移量（deltaRow, deltaColumn）为参数，用于在移动或旋转方块之前进行检测。
@@ -356,7 +460,7 @@ bool Frame::checkCollision(int deltaRow, int deltaColumn) {
 				int targetColumn = b->column + deltaColumn;
 
 				// 检查是否越界
-				if (targetRow < 0 || targetRow >= map_height || targetColumn < 0 || targetColumn >= map_width) {
+				if (targetRow <= 0 || targetRow >= map_height || targetColumn <= 0 || targetColumn >= map_width) {
 					return true; // 越界表示碰撞
 				}
 
@@ -374,12 +478,12 @@ bool Frame::checkCollision(int deltaRow, int deltaColumn) {
 
 
 
-void Frame::moveLeft() {
+bool Frame::moveLeft() {
 	// 检查向左移动是否有碰撞
 	// deltaRow = 0, deltaColumn = -1 表示尝试向左一格的位置
 	if (checkCollision(0, -1)) {
 		// 有碰撞则直接返回，不移动
-		return;
+		return false;
 	}
 
 	// 无碰撞，可以左移
@@ -390,14 +494,15 @@ void Frame::moveLeft() {
 			}
 		}
 	}
+	return true;
 }
 
-void Frame::moveRight() {
+bool Frame::moveRight() {
 	// 检查向右移动是否有碰撞
 	// deltaRow = 0, deltaColumn = 1 表示尝试向右一格的位置
 	if (checkCollision(0, 1)) {
 		// 有碰撞则直接返回，不移动
-		return;
+		return false ;
 	}
 
 	// 无碰撞，可以右移
@@ -408,29 +513,38 @@ void Frame::moveRight() {
 			}
 		}
 	}
+	return true;
 }
 
-
-
-void Frame::moveDown() {
+bool Frame::moveDown() {
 	// 检查向下移动是否有碰撞
 	// deltaRow = 1, deltaColumn = 0 表示尝试向下移动一格的位置
 	if (checkCollision(1, 0)) {
-		// 有碰撞则直接返回，不移动
-		return;
+		// 检查到碰撞停止，立即将block_group的数据传送到block
+		for (auto &x : block_group) {
+			for (auto& y : x) {
+				if (y->is_block) {
+					block[y->row][y->column]->is_block = true;
+					block[y->row][y->column]->color = y->color;
+				}
+			}
+		}
+		//调用触底函数，并进行下一个方块组合的xialuo
+		block_group_ground();
+
+		return false;
 	}
 
 	// 无碰撞，可以下移
 	for (auto& row_vec : block_group) {
 		for (auto& b : row_vec) {
 			if (b->is_block) {
-				b->row += 1; // 下移一格
+				b->row += 1; // 下移1格
 			}
 		}
 	}
+	return true;
 }
-
-
 
 
 void Frame::rotate()
@@ -502,8 +616,7 @@ void Frame::rotate()
 	}
 }
 
-
-void Frame::moveToLowestPosition()
+bool Frame::moveToLowestPosition()
 {
 	// 不断检测方块是否可以继续向下移动一格
 	while (!checkCollision(1, 0))
@@ -520,5 +633,6 @@ void Frame::moveToLowestPosition()
 			}
 		}
 	}
+	return true;
 }
 

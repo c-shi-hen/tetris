@@ -19,7 +19,7 @@ public:
 	//默认窗口高度
 	const int begin_frame_height = 800;
 	//默认地图大小
-	const map_size default_map_size = { 20, 10 };
+	const map_size default_map_size = { 10, 20 };
 private:
 	IMAGE background;
 	void inline draw_backgroud();
