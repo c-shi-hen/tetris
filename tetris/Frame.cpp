@@ -5,12 +5,12 @@
 
 Frame::Frame(int map_width, int map_height, Animation* animation) {
 	//获得地图参数
-	this->map_height = map_height;
+	this->map_height = map_height + 4;//前四行留给生成方块使用
 	this->map_width = map_width;
-	menu_width = map_width * Block::block_width / 4;
-	menu_height = map_height * Block::block_height;
-	frame_width = map_width * Block::block_width + menu_width;
-	frame_height = map_height * Block::block_height;
+	this->menu_width = map_width * Block::block_width / 4 + 200;
+	this->menu_height = map_height * Block::block_height;
+	this->frame_width = this->map_width * Block::block_width + menu_width;
+	this->frame_height = this->map_height * Block::block_height;
 
 	//获取图片资源
 	this->animation = animation;
@@ -24,13 +24,14 @@ Frame::Frame(int map_width, int map_height, Animation* animation) {
 	is_left = false;
 	is_right = false;
 	is_space = false;
+	is_pause = false;
 
 	//初始化得分
 	score = 0;
 
 	//初始化得分坐标
-	score_x_axis = 0;
-	score_y_axis = 0;
+	score_x_axis = this->map_width * Block::block_width + menu_width / 4;
+	score_y_axis = 20;
 
 	//初始化速度
 	SPEED = 1;
@@ -39,8 +40,11 @@ Frame::Frame(int map_width, int map_height, Animation* animation) {
 	initial_block();
 
 	//初始化方块组合图片的坐标
-	next_group_block_x_axis = 10;
-	next_group_block_y_axis = 10;
+	next_group_block_x_axis = this->map_width * Block::block_width + menu_width / 4;
+	next_group_block_y_axis = 100;
+
+	//初始化进行
+	running = false;
 }
 
 Frame::~Frame() {
@@ -69,11 +73,24 @@ void Frame::game_begin() {
 	//绘制下一个方块组合的图片
 	draw_block_group_png();
 
+	//绘制一条分界线
+	setlinecolor(RED);
+	line(map_width * Block::block_width, 0, map_width, map_height * Block::block_height);
+
 	//显示
 	FlushBatchDraw();
 
+	//开始运行
+	this->running = true;
+
 	//开始get消息
 	get_message(message);
+}
+
+void Frame::game_over() {
+	running = false;
+	MessageBox(NULL, _T("Game Over"), _T("提示"), MB_OK);
+	exit(1);
 }
 
 void Frame::generate_block_group() {
@@ -90,6 +107,9 @@ void Frame::generate_block_group() {
 	std::uniform_int_distribution<> dis(start, end); // 均匀分布
 	// 生成随机数
 	int block_group_shape = dis(gen);
+
+	//测试用
+	//int block_group_shape = 4;
 
 	//存储下生成的随机数对应的方块组合图片
 	block_group_png_index = block_group_shape;
@@ -109,7 +129,7 @@ void Frame::generate_block_group() {
 		break;
 	}
 	case Z: {
-		int color = BLOCK_GREEN;
+		int color = BLOCK_BLUE;
 		next_block_group[0][0]->is_block = true;
 		next_block_group[0][0]->color = color;
 		next_block_group[0][1]->is_block = true;
@@ -193,7 +213,7 @@ void Frame::get_message(ExMessage& message) {
 	//下降速度过快，引入计时器，满足gap(5)再下落
 	int timer = 0;
 
-	while (true) {
+	while (running) {
 
 		timer++;
 		//动态延时优化性能，保证每次循环执行的时间高于帧率
@@ -227,6 +247,11 @@ void Frame::get_message(ExMessage& message) {
 					is_space = true;
 					break;
 				}
+				case VK_ESCAPE:{
+					if (is_pause) {
+
+					}
+				}
 				default:
 					break;
 				}
@@ -258,20 +283,19 @@ void Frame::get_message(ExMessage& message) {
 				}
 			}
 		}
-		
 
 		//每个按键的消息单独处理
-		if (is_left) moveLeft();
-		if (is_right) moveRight();
-		if (is_up) rotate();
-		if (is_down) SPEED++;
-		if (is_space) moveToLowestPosition();
-
+		if (timer % 2 == 0) {
+			if (is_left) moveLeft();
+			if (is_right) moveRight();
+			if (is_up) rotate();
+			if (is_down) SPEED++;
+			if (is_space) moveToLowestPosition();
+		}
 		//下落SPEED行
-		
-		if (timer % 100 == 0) {
-			moveDown();
-			timer %= 100;
+		if (timer % 10 == 0) {
+			for (int i = 0; i < SPEED; i++) moveDown();
+			timer %= 10;
 		}
 
 		//刷新
@@ -284,37 +308,51 @@ void Frame::get_message(ExMessage& message) {
 			Sleep(1000 / 60 - run_time);
 		}
 	}
+
 }
 
 void Frame::check_line() {
-	for (int i = 0; i < map_height; i++) {
-		bool flag = true;
-		for (int j = 0; j < map_width; j++) {
-			if (block[i][j]->is_block = false) {
-				flag = false;
+	//检测是否可以消除
+	bool is_erase = true;
+
+	//连续消除得分倍数翻倍
+	int base = 1;
+
+	//第一次默认可以消除，直到出现不能消除的情况再结束
+	while(is_erase){
+		for (int i = 0; i < map_height; i++) {
+			is_erase = false;
+			bool flag = true;
+			for (int j = 0; j < map_width; j++) {
+				if (block[i][j]->is_block == false) {
+					flag = false; 
+					break;
+				}
+			}
+			if (flag) {
+				erase_line(i);
+				this->score += base;
+				base++;
+				is_erase = true;
 				break;
 			}
-		}
-		if (flag) {
-			erase_line(i);
-			break;
 		}
 	}
 }
 
 void Frame::erase_line(int row) {
-	//第一行特殊处理
-	if (row == 0) {
-		for (int i = 0; i < map_width; i++) {
-			block[row][i]->is_block = false;
+	
+	//直接覆盖改行，之后整体下移一行
+	for (int i = row; i > 0; i--) {
+		for (int j = 0; j < map_width; j++) {
+			block[i][j]->is_block = block[i - 1][j]->is_block;
+			block[i][j]->color = block[i - 1][j]->color;
 		}
 	}
-	else {
-		//上一行下落，传递必要参数
-		for (int i = 0; i < map_width; i++) {
-			block[row][i]->is_block = block[row - 1][i]->is_block;
-			block[row][i]->color = block[row - 1][i]->color;
-		}
+
+	//第一行清除为空
+	for (int i = 0; i < map_width; i++) {
+		block[0][i]->is_block = false;
 	}
 }
 
@@ -350,10 +388,17 @@ void Frame::renew_frame() {
 	//绘制下一个方块组合的图片
 	draw_block_group_png();
 
+	//绘制一条分界线
+	setlinecolor(RED);
+	line(map_width * Block::block_width, 0, map_width * Block::block_width, map_height * Block::block_height);
+
+	//绘制截止线
+	line(0, 4 * Block::block_height, map_width * Block::block_width, 4 * Block::block_height);
+	setlinecolor(BLACK);
+
 	//显示
 	FlushBatchDraw();
 }
-
 
 void Frame::draw_block() {
 	//绘制棋盘本身
@@ -434,7 +479,22 @@ void Frame::trans_block_group() {
 	next_block_group.clear();
 }
 
+void Frame::check_over_map() {
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < map_width; j++) {
+			//查找出现溢出
+			if (block[i][j]->is_block == true) {
+				game_over();
+			}
+		}
+	}
+}
+
 void Frame::block_group_ground() {
+
+	//检查游戏结束
+	check_over_map();
+
 	//先检查是否可以消除
 	check_line();
 
@@ -448,9 +508,6 @@ void Frame::block_group_ground() {
 	generate_block_group();
 }
 
-// 以行列偏移量（deltaRow, deltaColumn）为参数，用于在移动或旋转方块之前进行检测。
-// 当准备向某个方向（左、右、下）移动或在旋转后变换坐标时，
-// 只需根据新坐标计算出相对于当前坐标的偏移（或新位置），然后调用该函数检查是否有碰撞。
 bool Frame::checkCollision(int deltaRow, int deltaColumn) {
 	// 遍历当前下落方块组合中的所有块
 	for (auto& row_vec : block_group) {
@@ -460,7 +517,7 @@ bool Frame::checkCollision(int deltaRow, int deltaColumn) {
 				int targetColumn = b->column + deltaColumn;
 
 				// 检查是否越界
-				if (targetRow <= 0 || targetRow >= map_height || targetColumn <= 0 || targetColumn >= map_width) {
+				if (targetRow < 0 || targetRow >= map_height || targetColumn < 0 || targetColumn >= map_width) {
 					return true; // 越界表示碰撞
 				}
 
@@ -475,8 +532,6 @@ bool Frame::checkCollision(int deltaRow, int deltaColumn) {
 	// 如果所有激活方块检测后均无问题，则表示无碰撞
 	return false;
 }
-
-
 
 bool Frame::moveLeft() {
 	// 检查向左移动是否有碰撞
@@ -545,7 +600,6 @@ bool Frame::moveDown() {
 	}
 	return true;
 }
-
 
 void Frame::rotate()
 {

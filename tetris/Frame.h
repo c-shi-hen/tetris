@@ -80,7 +80,13 @@ public:
 	void rotate();
 
 	// 检查目标位置是否有碰撞
+	// 以行列偏移量（deltaRow, deltaColumn）为参数，用于在移动或旋转方块之前进行检测。
+	// 当准备向某个方向（左、右、下）移动或在旋转后变换坐标时，
+	// 只需根据新坐标计算出相对于当前坐标的偏移（或新位置），然后调用该函数检查是否有碰撞
 	bool checkCollision(int targetRow, int targetColumn);
+
+	//游戏是否正在进行
+	bool running;
 
 
 public:
@@ -109,6 +115,7 @@ public:
 	bool is_left;
 	bool is_right;
 	bool is_space;
+	bool is_pause;
 
 	//方块矩阵
 	std::vector<std::vector<Block*>> block;
@@ -185,6 +192,18 @@ private:
 	*/
 	void block_group_ground();
 
-	//释放方块组合的内存
+	/*
+	* @brief 释放方块组合的内存
+	*/
 	void delete_block_group();
+
+	/*
+	* @brief 判断是否出现溢出地图上边界，也即游戏结束
+	*/
+	void check_over_map();
+
+	/*
+	* @brief 判断游戏结束。当出现方块组合第一次溢出的时候，游戏结束 
+	*/
+	void game_over();
 };
