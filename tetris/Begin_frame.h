@@ -24,3 +24,10 @@ private:
 	IMAGE background;
 	void inline draw_backgroud();
 };
+
+//实现开始界面
+//开始游戏
+//残局挑战
+//残局生成
+//退出游戏
+//

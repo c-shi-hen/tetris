@@ -97,7 +97,7 @@ void Frame::generate_block_group() {
 	//根据随机数生成方块组合
 	switch (block_group_shape) {
 	case S: {
-		int color = BLOCK_GREEN;
+		int color = BLOCK_BLUE;
 		next_block_group[0][1]->is_block = true;
 		next_block_group[0][1]->color = color;
 		next_block_group[0][2]->is_block = true;
@@ -121,7 +121,7 @@ void Frame::generate_block_group() {
 		break;
 	}
 	case L: {
-		int color = BLOCK_GREEN;
+		int color = BLOCK_LIGHT_BLUE;
 		next_block_group[0][0]->is_block = true;
 		next_block_group[0][0]->color = color;
 		next_block_group[1][0]->is_block = true;
@@ -133,7 +133,7 @@ void Frame::generate_block_group() {
 		break;
 	}
 	case J: {
-		int color = BLOCK_GREEN;
+		int color = BLOCK_ORANGE;
 		next_block_group[0][2]->is_block = true;
 		next_block_group[0][2]->color = color;
 		next_block_group[1][0]->is_block = true;
@@ -146,7 +146,7 @@ void Frame::generate_block_group() {
 	}
 
 	case I: {
-		int color = BLOCK_GREEN;
+		int color = BLOCK_PURPLE;
 		next_block_group[0][1]->is_block = true;
 		next_block_group[0][1]->color = color;
 		next_block_group[1][1]->is_block = true;
@@ -158,7 +158,7 @@ void Frame::generate_block_group() {
 		break;
 	}
 	case O: {
-		int color = BLOCK_GREEN;
+		int color = BLOCK_YELLOW;
 		next_block_group[0][1]->is_block = true;
 		next_block_group[0][1]->color = color;
 		next_block_group[0][2]->is_block = true;
@@ -269,9 +269,9 @@ void Frame::get_message(ExMessage& message) {
 
 		//下落SPEED行
 		
-		if (timer % 10 == 0) {
+		if (timer % 100 == 0) {
 			moveDown();
-			timer %= 5;
+			timer %= 100;
 		}
 
 		//刷新

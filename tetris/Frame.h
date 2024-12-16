@@ -3,6 +3,8 @@
 #include"Block.h"
 #include <vector>
 #include"Animation.h"
+#include <windows.h> // 包含 Windows API
+#include <tchar.h> 
 
 
 #define VK_W 0x57
