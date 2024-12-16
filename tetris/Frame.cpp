@@ -249,7 +249,10 @@ void Frame::get_message(ExMessage& message) {
 				}
 				case VK_ESCAPE:{
 					if (is_pause) {
-
+						is_pause = false;
+					}
+					else {
+						is_pause = true;
 					}
 				}
 				default:
@@ -284,22 +287,43 @@ void Frame::get_message(ExMessage& message) {
 			}
 		}
 
-		//每个按键的消息单独处理
-		if (timer % 2 == 0) {
-			if (is_left) moveLeft();
-			if (is_right) moveRight();
-			if (is_up) rotate();
+		if (!is_pause) {
+			if (is_left) {
+				moveLeft();
+				is_left = false;
+				renew_frame();
+			}
+			if (is_right) {
+				moveRight();
+				is_right = false;
+				renew_frame();
+			}
+			if (is_up) {
+				rotate();
+				is_up = false;
+				renew_frame();
+			}
 			if (is_down) SPEED++;
-			if (is_space) moveToLowestPosition();
-		}
-		//下落SPEED行
-		if (timer % 10 == 0) {
-			for (int i = 0; i < SPEED; i++) moveDown();
-			timer %= 10;
+			if (is_space) {
+				moveToLowestPosition();
+				is_space = false;
+				renew_frame();
+			}
+
+			//下落SPEED行
+			if (timer % 10 == 0) {
+				for (int i = 0; i < SPEED; i++) {
+					moveDown();
+					renew_frame();
+				}
+				SPEED = 1;
+				timer %= 10;
+			}
 		}
 
-		//刷新
-		renew_frame();
+		//更新为每步都刷新
+		//renew_frame();
+		
 		//结束时间
 		ULONGLONG end_time = GetTickCount64();
 		//如果执行时间低于帧间隔，阻塞所缺时间，帧率设置为60

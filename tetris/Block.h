@@ -20,9 +20,9 @@ public:
 
 public:
 	//方块宽度
-	const static int block_width = 40;
+	const static int block_width = 30;
 	//方块高度
-	const static int block_height = 40;
+	const static int block_height = 30;
 	//方块所在排数
 	int row;
 	//方块所在列数
