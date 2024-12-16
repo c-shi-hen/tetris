@@ -1,10 +1,11 @@
 #include"Begin_frame.h"
 
 
-Begin_frame::Begin_frame()
-{
-
-	
+Begin_frame::Begin_frame(Animation* animation){
+	//默认地图宽度和高度
+	this->map_height = 15;
+	this->map_width = 10;
+	this->background = &animation->back_ground;
 }
 
 
@@ -25,6 +26,5 @@ void Begin_frame::initial() {
 * @brief 绘制地图背景
 */
 void inline Begin_frame::draw_backgroud() {
-	loadimage(&background, _T("../res/background.png"));
-	putimage(0, 0, &background);
+	putimage(0, 0, background);
 }
