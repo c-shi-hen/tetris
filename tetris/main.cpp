@@ -13,7 +13,7 @@ namespace fs = std::filesystem;
 
 
 
-
+/*
 int main()
 {
 	Animation* animation = new Animation();
@@ -38,7 +38,9 @@ int main()
 	return 0;
 }
 
-/*
+*/
+
+
 #define VK_G 0x47
 #define VK_Q 0x51
 
@@ -229,4 +231,3 @@ int main()
     }
 }
 
-*/

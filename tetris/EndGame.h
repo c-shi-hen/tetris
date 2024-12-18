@@ -2,8 +2,7 @@
 
 #include <vector>
 #include <string>
-#include "Frame.h" // 确保 Frame.h 已定义
-
+#include "Frame.h" 
 class EndGame {
 public:
     // 构造函数
@@ -31,9 +30,9 @@ private:
     std::vector<std::vector<bool>> map; // 地图二维数组
     std::vector<std::vector<int>> blockColors; // 方块颜色二维数组
 
-    // 显示当前地图状态（利用 Frame 的显示函数）
+    // 显示当前地图状态
     void displayMap(const Frame& frame) const;
 
-    // 获取方块颜色（示例实现，您可以根据需求调整）
+    // 获取方块颜色
     int getBlockColor() const;
 };
