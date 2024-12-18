@@ -117,7 +117,7 @@ void Frame::generate_block_group() {
 	//根据随机数生成方块组合
 	switch (block_group_shape) {
 	case S: {
-		int color = BLOCK_BLUE;
+		int color = BLOCK_GREEN;
 		next_block_group[0][1]->is_block = true;
 		next_block_group[0][1]->color = color;
 		next_block_group[0][2]->is_block = true;
@@ -202,9 +202,9 @@ void Frame::generate_block_group() {
 		break;
 	}
 	default:
-			//程序出错，直接退出
-			exit(0);
-			break;
+		//程序出错，直接退出
+		exit(0);
+		break;
 	}
 }
 
@@ -223,7 +223,7 @@ void Frame::get_message(ExMessage& message) {
 			std::cout << "get keydown" << toascii(message.vkcode) << std::endl;
 			if (message.message == WM_KEYDOWN) {
 				//每个按键单独处理
-				switch (message.vkcode){
+				switch (message.vkcode) {
 				case VK_W: {
 					is_up = true;
 					break;
@@ -247,7 +247,7 @@ void Frame::get_message(ExMessage& message) {
 					is_space = true;
 					break;
 				}
-				case VK_ESCAPE:{
+				case VK_ESCAPE: {
 					if (is_pause) {
 						is_pause = false;
 					}
@@ -343,13 +343,13 @@ void Frame::check_line() {
 	int base = 1;
 
 	//第一次默认可以消除，直到出现不能消除的情况再结束
-	while(is_erase){
+	while (is_erase) {
 		for (int i = 0; i < map_height; i++) {
 			is_erase = false;
 			bool flag = true;
 			for (int j = 0; j < map_width; j++) {
 				if (block[i][j]->is_block == false) {
-					flag = false; 
+					flag = false;
 					break;
 				}
 			}
@@ -365,7 +365,7 @@ void Frame::check_line() {
 }
 
 void Frame::erase_line(int row) {
-	
+
 	//直接覆盖改行，之后整体下移一行
 	for (int i = row; i > 0; i--) {
 		for (int j = 0; j < map_width; j++) {
@@ -384,7 +384,7 @@ void inline Frame::draw_backgroud() {
 	putimage(0, 0, this->background);
 }
 
-void inline Frame::initial_block(){
+void inline Frame::initial_block() {
 	for (int i = 0; i < map_height; i++) {
 		std::vector<Block*> block_line;
 		for (int j = 0; j < map_width; j++) {
@@ -492,7 +492,7 @@ void Frame::delete_block_group() {
 }
 
 void Frame::trans_block_group() {
-	for (int i = 0; i < next_block_group.size();  i++) {
+	for (int i = 0; i < next_block_group.size(); i++) {
 		std::vector<Block*> temp_line;
 		for (int j = 0; j < next_block_group[i].size(); j++) {
 			temp_line.push_back(next_block_group[i][j]);
@@ -581,7 +581,7 @@ bool Frame::moveRight() {
 	// deltaRow = 0, deltaColumn = 1 表示尝试向右一格的位置
 	if (checkCollision(0, 1)) {
 		// 有碰撞则直接返回，不移动
-		return false ;
+		return false;
 	}
 
 	// 无碰撞，可以右移
@@ -600,7 +600,7 @@ bool Frame::moveDown() {
 	// deltaRow = 1, deltaColumn = 0 表示尝试向下移动一格的位置
 	if (checkCollision(1, 0)) {
 		// 检查到碰撞停止，立即将block_group的数据传送到block
-		for (auto &x : block_group) {
+		for (auto& x : block_group) {
 			for (auto& y : x) {
 				if (y->is_block) {
 					block[y->row][y->column]->is_block = true;

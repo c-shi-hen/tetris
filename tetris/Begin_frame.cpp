@@ -1,7 +1,7 @@
 #include"Begin_frame.h"
 
 
-Begin_frame::Begin_frame(Animation* animation){
+Begin_frame::Begin_frame(Animation* animation) {
 	//默认地图宽度和高度
 	this->map_height = 20;
 	this->map_width = 10;
