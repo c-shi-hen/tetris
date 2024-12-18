@@ -117,7 +117,7 @@ void Frame::generate_block_group() {
 	//根据随机数生成方块组合
 	switch (block_group_shape) {
 	case S: {
-		int color = BLOCK_GREEN;
+		int color = BLOCK_BLUE;
 		next_block_group[0][1]->is_block = true;
 		next_block_group[0][1]->color = color;
 		next_block_group[0][2]->is_block = true;
