@@ -3,8 +3,6 @@
 #include"Block.h"
 #include <vector>
 #include"Animation.h"
-#include <windows.h> // 包含 Windows API
-#include <tchar.h> 
 
 
 #define VK_W 0x57
@@ -124,7 +122,7 @@ public:
 	std::vector<std::vector<Block*>> block_group;
 	//下一个方块组合
 	std::vector<std::vector<Block*>> next_block_group;
-	
+
 	//方块组合字符表示的index
 	int block_group_png_index;
 
@@ -154,7 +152,7 @@ private:
 	IMAGE* background;
 	//方块组合照片
 	std::vector<IMAGE*>* block_group_png;
-	
+
 	enum blcok_group
 	{
 		S, Z, L, J, I, O, T//方块组合，待定，仍可添加，顺序和加载方块图片的顺序一致
@@ -203,7 +201,7 @@ private:
 	void check_over_map();
 
 	/*
-	* @brief 判断游戏结束。当出现方块组合第一次溢出的时候，游戏结束 
+	* @brief 判断游戏结束。当出现方块组合第一次溢出的时候，游戏结束
 	*/
 	void game_over();
 };
