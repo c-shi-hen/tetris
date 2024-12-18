@@ -323,7 +323,7 @@ void Frame::get_message(ExMessage& message) {
 
 		//更新为每步都刷新
 		//renew_frame();
-
+		
 		//结束时间
 		ULONGLONG end_time = GetTickCount64();
 		//如果执行时间低于帧间隔，阻塞所缺时间，帧率设置为60
