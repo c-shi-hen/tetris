@@ -9,6 +9,10 @@ public:
 	Begin_frame(Animation* animation);
 	~Begin_frame();
 	void initial();
+private:
+	int gameSpeed;
+	int randomSeed;
+	int initialLevel;
 
 public:
 	//默认窗口宽度
@@ -21,4 +25,17 @@ public:
 private:
 	IMAGE* background;
 	void inline draw_backgroud();
+
+public:
+	struct MainMenuMessage {
+		bool startGame = false;
+		bool quitGame = false;
+		bool createConfig = false;
+		bool loadConfig = false;
+	};
+
+	bool getMainMenuMessage(MainMenuMessage& msg);
+
+	void drawMainMenu() ;
 };
+

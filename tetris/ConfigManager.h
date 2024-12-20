@@ -1,29 +1,52 @@
-// ConfigManager.h 实现自定义配置功能
 #pragma once
-
 #include <string>
+#include <unordered_map>
+#include <optional>
 
-// 定义配置结构体
-struct Config {
-    int gameSpeed;      // 1到10的正整数
-    int randomSeed;     // 任意整数，-1表示不固定随机种子
-    int initialLevel;   // 正整数
+class ConfigManager {
+public:
+    ConfigManager();
 
-    Config(); // 构造函数
+    // 加载指定配置文件
+    bool loadConfig(const std::string& filename);
 
-    // 验证配置的合法性
+    // 保存当前配置到指定文件
+    bool saveConfig(const std::string& filename) const;
+
+    // 用户交互：新建配置文件
+    bool createConfig();
+
+    // 加载上次使用的配置文件
+    bool loadLastConfig();
+
+    // 保存当前配置为上次使用的配置
+    bool saveLastConfig() const;
+
+    // 获取某个配置项的值
+    std::optional<std::string> getConfig(const std::string& key) const;
+
+    // 设置某个配置项的值
+    void setConfig(const std::string& key, const std::string& value);
+
+    // 重置为默认配置
+    void resetToDefault();
+
+    // 验证整个配置是否合法
     bool isValid() const;
 
-    // 保存配置到文件
-    bool saveToFile(const std::string& filename) const;
+    // 验证单个键值对是否合法
+    bool validateKeyValue(const std::string& key, const std::string& value) const;
 
-    // 从文件加载配置
-    bool loadFromFile(const std::string& filename);
+    // 初始化默认配置
+    void initializeDefaults();
+
+    std::unordered_map<std::string, std::string> configMap; // 存储配置项的键值对
+
+public:
+    // 公共方法，用于测试键值对是否合法
+    bool testValidateKeyValue(const std::string& key, const std::string& value) const;
 };
 
-// 配置管理函数声明
-bool createConfig();
-bool loadConfig(Config& config);
-bool loadLastConfig(Config& config);
-bool createDirectoryIfNotExists(const std::string& path);
+// 辅助函数声明
 bool fileExists(const std::string& filename);
+bool createDirectoryIfNotExists(const std::string& path);

@@ -1,209 +1,193 @@
 #include "ConfigManager.h"
 #include <iostream>
+#include <fstream>
 #include <regex>
 #include <filesystem>
-#include <fstream>
-#include <ctime>
 
 namespace fs = std::filesystem;
 
-// 构造函数，初始化默认值
-Config::Config() : gameSpeed(5), randomSeed(-1), initialLevel(1) {}
-
-// 验证配置的合法性
-bool Config::isValid() const {
-    return (gameSpeed >= 1 && gameSpeed <= 10) &&
-        (initialLevel >= 1);
-    // randomSeed 可以是任意整数
-}
-
-// 保存配置到文件
-bool Config::saveToFile(const std::string& filename) const {
-    std::ofstream ofs(filename);
-    if (!ofs.is_open()) return false;
-    ofs << gameSpeed << "\n" << randomSeed << "\n" << initialLevel << "\n";
-    ofs.close();
-    return true;
-}
-
-// 从文件加载配置
-bool Config::loadFromFile(const std::string& filename) {
-    std::ifstream ifs(filename);
-    if (!ifs.is_open()) return false;
-    ifs >> gameSpeed >> randomSeed >> initialLevel;
-    if (ifs.fail()) {
-        ifs.close();
-        return false;
-    }
-    ifs.close();
-    return isValid();
-}
-
-// 创建目录（使用 std::filesystem）
-bool createDirectoryIfNotExists(const std::string& path) {
-    try {
-        return fs::create_directories(path);
-    }
-    catch (const fs::filesystem_error& e) {
-        std::cerr << "创建目录失败: " << e.what() << std::endl;
-        return false;
-    }
-}
-
-// 检查文件是否存在（使用 std::filesystem）
-bool fileExists(const std::string& filename) {
+//检查文件是否存在
+bool fileExists(std::string& filename) {
     try {
         return fs::exists(filename);
     }
-    catch (const fs::filesystem_error& e) {
-        std::cerr << "检查文件存在性失败: " << e.what() << std::endl;
+    catch (fs::filesystem_error& e) {
+        std::cout << "文件不存在: " << e.what() << std::endl;
         return false;
     }
 }
 
-// 创建配置文件
-bool createConfig() {
-    std::string configName;
-    std::cout << "请输入配置文件名称（仅限英文字母、数字和下划线，输入 'q' 取消）：";
-    std::cin >> configName;
+// 确认目录存在，如果不存在则创建
+bool createDirectoryIfNotExists(std::string& path) {
+    try {
+        if (fs::create_directories(path)) {
+            std::cout << "目录已创建: " << path << std::endl;
+        }
+        return true;
+    }
+    catch (fs::filesystem_error& e) {
+        std::cout << "创建目录失败: " << e.what() << std::endl;
+        return false;
+    }
+}
 
-    if (configName == "q") {
-        std::cout << "取消新建配置。" << std::endl;
+// 构造函数：初始化默认配置
+ConfigManager::ConfigManager() {
+    initializeDefaults();
+}
+
+// 初始化默认配置
+void ConfigManager::initializeDefaults() {
+    configMap["gameSpeed"] = "5";
+    configMap["randomSeed"] = "-1";
+    configMap["initialLevel"] = "1";
+}
+
+// 加载指定配置文件
+bool ConfigManager::loadConfig(const std::string& filename) {
+    try {
+        if (!fileExists(filename)) {
+            std::cerr << "配置文件不存在: " << filename << std::endl;
+            return false;
+        }
+
+        std::ifstream infile(filename);
+        if (!infile.is_open()) {
+            std::cerr << "无法打开配置文件: " << filename << std::endl;
+            return false;
+        }
+
+        configMap.clear();
+        std::string line;
+        while (std::getline(infile, line)) {
+            std::regex kvRegex("^([a-zA-Z0-9_]+)=(.+)$");
+            std::smatch match;
+            if (std::regex_match(line, match, kvRegex)) {
+                setConfig(match[1], match[2]);
+            }
+            else {
+                std::cerr << "配置文件中存在无效行: " << line << std::endl;
+            }
+        }
+        infile.close();
+
+        return isValid();
+    }
+    catch (const std::exception& e) {
+        std::cerr << "加载配置失败: " << e.what() << std::endl;
+        return false;
+    }
+}
+
+// 保存当前配置到指定文件
+bool ConfigManager::saveConfig(const std::string& filename) const {
+    try {
+        std::ofstream outfile(filename);
+        if (!outfile.is_open()) {
+            std::cerr << "无法打开文件进行写入: " << filename << std::endl;
+            return false;
+        }
+
+        for (const auto& [key, value] : configMap) {
+            outfile << key << "=" << value << "\n";
+        }
+        outfile.close();
+        return true;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "保存配置失败: " << e.what() << std::endl;
+        return false;
+    }
+}
+
+// 用户交互：新建配置文件
+bool ConfigManager::createConfig() {
+    std::string name;
+    std::cout << "请输入新配置文件名称（仅限字母、数字和下划线，输入 'q' 退出）：";
+    std::cin >> name;
+
+    if (name == "q") {
+        std::cout << "取消新建配置。\n";
         return false;
     }
 
-    // 验证配置文件名
-    std::regex validNameRegex("^[A-Za-z0-9_]+$");
-    if (!std::regex_match(configName, validNameRegex)) {
-        std::cout << "配置文件名称无效。只能包含英文字母、数字和下划线。" << std::endl;
+    std::regex validName("^[A-Za-z0-9_]+$");
+    if (!std::regex_match(name, validName)) {
+        std::cerr << "无效的配置名称。\n";
         return false;
     }
 
-    Config newConfig;
-    // 输入游戏基本速度
-    while (true) {
-        std::cout << "请输入游戏基本速度（1-10）：";
-        std::cin >> newConfig.gameSpeed;
-        if (std::cin.fail() || newConfig.gameSpeed < 1 || newConfig.gameSpeed > 10) {
-            std::cin.clear(); // 清除错误标志
-            std::cin.ignore(10000, '\n'); // 忽略错误输入
-            std::cout << "输入无效，请输入1到10的正整数。" << std::endl;
-        }
-        else {
-            break;
-        }
-    }
-
-    // 输入随机种子
-    while (true) {
-        std::cout << "请输入随机种子（整数，-1表示不固定随机种子）：";
-        std::cin >> newConfig.randomSeed;
-        if (std::cin.fail()) {
-            std::cin.clear();
-            std::cin.ignore(10000, '\n');
-            std::cout << "输入无效，请输入一个整数。" << std::endl;
-        }
-        else {
-            break;
-        }
-    }
-
-    // 输入初始关卡
-    while (true) {
-        std::cout << "请输入初始关卡（正整数）：";
-        std::cin >> newConfig.initialLevel;
-        if (std::cin.fail() || newConfig.initialLevel < 1) {
-            std::cin.clear();
-            std::cin.ignore(10000, '\n');
-            std::cout << "输入无效，请输入一个正整数。" << std::endl;
-        }
-        else {
-            break;
-        }
-    }
-
-    // 创建 config 目录（如果不存在）
-    if (!createDirectoryIfNotExists("config")) {
-        std::cout << "无法创建 'config' 目录。" << std::endl;
+    std::string filename = "config/" + name + ".config";
+    if (!saveConfig(filename)) {
+        std::cerr << "保存配置文件失败。\n";
         return false;
     }
 
-    // 保存配置文件
-    std::string configFilePath = "config/" + configName + ".config";
-    if (!newConfig.saveToFile(configFilePath)) {
-        std::cout << "保存配置文件失败。" << std::endl;
-        return false;
-    }
-
-    // 更新最后使用的配置
-    std::string lastConfigPath = "config/last.config";
-    Config lastConfig = newConfig;
-    if (!lastConfig.saveToFile(lastConfigPath)) {
-        std::cout << "更新最后使用的配置文件失败。" << std::endl;
-    }
-
-    std::cout << "配置文件 '" << configName << ".config' 创建成功并保存。" << std::endl;
+    std::cout << "配置文件已保存为: " << filename << std::endl;
     return true;
 }
 
-// 加载配置文件
-bool loadConfig(Config& config) {
-    std::string currentConfigName;
-    std::cout << "请输入要加载的配置文件名称（仅限英文字母、数字和下划线，输入 'q' 取消）：";
-    std::cin >> currentConfigName;
+// 加载上次使用的配置
+bool ConfigManager::loadLastConfig() {
+    return loadConfig("config/last.config");
+}
 
-    if (currentConfigName == "q") {
-        std::cout << "取消加载配置。" << std::endl;
-        return false;
+// 保存当前配置为上次使用的配置
+bool ConfigManager::saveLastConfig() const {
+    return saveConfig("config/last.config");
+}
+
+// 获取某个配置项的值
+std::optional<std::string> ConfigManager::getConfig(const std::string& key) const {
+    auto it = configMap.find(key);
+    if (it != configMap.end()) {
+        return it->second;
     }
+    return std::nullopt;
+}
 
-    // 验证配置文件名
-    std::regex validNameRegex("^[A-Za-z0-9_]+$");
-    if (!std::regex_match(currentConfigName, validNameRegex)) {
-        std::cout << "配置文件名称无效。只能包含英文字母、数字和下划线。" << std::endl;
-        return false;
+// 设置某个配置项的值
+void ConfigManager::setConfig(const std::string& key, const std::string& value) {
+    if (validateKeyValue(key, value)) {
+        configMap[key] = value;
     }
-
-    std::string configFilePath = "config/" + currentConfigName + ".config";
-    if (!fileExists(configFilePath)) {
-        std::cout << "配置文件 '" << currentConfigName << ".config' 不存在。" << std::endl;
-        return false;
+    else {
+        std::cerr << "无效的配置值: " << key << "=" << value << std::endl;
     }
+}
 
-    Config loadedConfig;
-    if (!loadedConfig.loadFromFile(configFilePath)) {
-        std::cout << "加载配置文件失败或配置文件内容无效。" << std::endl;
-        return false;
+// 重置为默认配置
+void ConfigManager::resetToDefault() {
+    initializeDefaults();
+}
+
+// 验证整个配置是否合法
+bool ConfigManager::isValid() const {
+    for (const auto& [key, value] : configMap) {
+        if (!validateKeyValue(key, value)) {
+            return false;
+        }
     }
-
-    config = loadedConfig;
-
-    // 更新最后使用的配置
-    std::string lastConfigPath = "config/last.config";
-    Config lastConfig = loadedConfig;
-    if (!lastConfig.saveToFile(lastConfigPath)) {
-        std::cout << "更新最后使用的配置文件失败。" << std::endl;
-    }
-
-    std::cout << "配置文件 '" << currentConfigName << ".config' 加载成功并应用。" << std::endl;
     return true;
 }
 
-// 加载最后使用的配置
-bool loadLastConfig(Config& config) {
-    std::string lastConfigPath = "config/last.config";
-    if (!fileExists(lastConfigPath)) {
-        std::cout << "没有找到最后使用的配置文件，使用默认配置。" << std::endl;
-        return false;
+// 验证单个键值对是否合法
+bool ConfigManager::validateKeyValue(const std::string& key, const std::string& value) const {
+    if (key == "gameSpeed") {
+        int speed = std::stoi(value);
+        return speed >= 1 && speed <= 10;
     }
-
-    Config loadedConfig;
-    if (!loadedConfig.loadFromFile(lastConfigPath)) {
-        std::cout << "加载最后使用的配置文件失败或内容无效，使用默认配置。" << std::endl;
-        return false;
+    else if (key == "randomSeed") {
+        return std::regex_match(value, std::regex("^-?\\d+$"));
     }
+    else if (key == "initialLevel") {
+        int level = std::stoi(value);
+        return level >= 1;
+    }
+    return false;
+}
 
-    config = loadedConfig;
-    std::cout << "加载最后使用的配置文件成功。" << std::endl;
-    return true;
+
+bool ConfigManager::testValidateKeyValue(const std::string& key, const std::string& value) const {
+    return validateKeyValue(key, value);
 }
