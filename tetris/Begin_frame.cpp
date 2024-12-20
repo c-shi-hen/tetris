@@ -5,11 +5,13 @@
 #define VK_Q 0x51
 #define VK_I 0x49
 #define VK_U 0x55
+#define VK_M 0x4D
+#define VK_N 0x4E
 namespace fs = std::filesystem;
 
 Begin_frame::Begin_frame(Animation* animation) {
 	//默认地图宽度和高度
-	this->map_height = 15;
+	this->map_height = 20;
 	this->map_width = 10;
 	this->background = &animation->back_ground;
 }
@@ -41,31 +43,59 @@ void inline Begin_frame::draw_backgroud() {
 
 // 绘制主菜单界面
 void Begin_frame::drawMainMenu() {
+    // 清空屏幕
     cleardevice();
+
+    // 获取屏幕宽高
+    int screenWidth = 800;  // 主界面宽度（稍大）
+    int screenHeight = 600; // 主界面高度（稍大）
+
+    // 初始化窗口大小
+    initgraph(screenWidth, screenHeight);
+    SetWindowText(GetHWnd(), L"俄罗斯方块 - 主菜单");
+
+    // 设置标题字体和颜色
     settextstyle(48, 0, _T("Arial"));
     settextcolor(YELLOW);
 
+    // 标题内容
     TCHAR title[] = _T("欢迎来到俄罗斯方块");
+    int titleWidth = textwidth(title);
+    int titleHeight = textheight(title);
+
+    // 居中绘制标题
+    int titleX = (screenWidth - titleWidth) / 2;
+    int titleY = screenHeight / 6; // 标题位置稍高，1/6 高度
+    outtextxy(titleX, titleY, title);
+
+    // 设置菜单字体
+    settextstyle(24, 0, _T("Arial"));
+
+    // 主菜单选项
     TCHAR prompt1[] = _T("按 'G' 开始游戏");
     TCHAR prompt2[] = _T("按 'Q' 退出游戏");
     TCHAR prompt3[] = _T("按 'I' 新建配置");
     TCHAR prompt4[] = _T("按 'U' 加载配置");
+    TCHAR prompt5[] = _T("按 'M' 进入残局挑战");
+    TCHAR prompt6[] = _T("按 'N' 创建残局");
 
-    int titleWidth = textwidth(title);
-    int prompt1Width = textwidth(prompt1);
-    int prompt2Width = textwidth(prompt2);
-    int prompt3Width = textwidth(prompt3);
-    int prompt4Width = textwidth(prompt4);
+    // 垂直居中绘制选项
+    int menuStartY = titleY + titleHeight + 50; // 菜单起始位置在标题下方
+    int menuSpacing = 50; // 菜单行间距
 
-    outtextxy((getwidth() - titleWidth) / 2, getheight() / 2 - 120, title);
-    settextstyle(24, 0, _T("Arial"));
-    outtextxy((getwidth() - prompt1Width) / 2, getheight() / 2 - 20, prompt1);
-    outtextxy((getwidth() - prompt2Width) / 2, getheight() / 2 + 20, prompt2);
-    outtextxy((getwidth() - prompt3Width) / 2, getheight() / 2 + 60, prompt3);
-    outtextxy((getwidth() - prompt4Width) / 2, getheight() / 2 + 100, prompt4);
+    TCHAR* menuOptions[] = { prompt1, prompt2, prompt3, prompt4, prompt5, prompt6 };
+    for (int i = 0; i < 6; ++i) {
+        int optionWidth = textwidth(menuOptions[i]);
+        int optionX = (screenWidth - optionWidth) / 2; // 水平居中
+        int optionY = menuStartY + i * menuSpacing;
+        outtextxy(optionX, optionY, menuOptions[i]);
+    }
 
+    // 刷新屏幕
     FlushBatchDraw();
 }
+
+
 
 
 
@@ -85,6 +115,12 @@ bool Begin_frame::getMainMenuMessage(MainMenuMessage& msg) {
             return true;
         case VK_U:
             msg.loadConfig = true;
+            return true;
+        case VK_M:  
+            msg.challengeEndGame = true;
+            return true;
+        case VK_N:  
+            msg.createEndGame = true;
             return true;
         default:
             break;

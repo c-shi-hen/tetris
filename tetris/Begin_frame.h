@@ -40,6 +40,8 @@ public:
 		bool quitGame = false;
 		bool createConfig = false;
 		bool loadConfig = false;
+		bool challengeEndGame = false;
+		bool createEndGame = false;
 	};
 
 	bool getMainMenuMessage(MainMenuMessage& msg);
