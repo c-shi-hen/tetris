@@ -3,13 +3,13 @@
 #include"Block.h"
 #include <vector>
 #include"Animation.h"
-
+#include"Begin_frame.h"
 
 #define VK_W 0x57
 #define VK_S 0x53
 #define VK_A 0x41
 #define VK_D 0x44
-
+#define VK_G 0x47
 
 class Frame
 {
@@ -18,7 +18,7 @@ public:
 	* @brief 游戏初始化时构造，主函数中调用一次
 	* @param map_width: 横向可容纳方块的数量，map_height:纵向可容纳方块的数量
 	*/
-	Frame(int map_width, int map_height, Animation* animation);
+	Frame(Animation* animation, Begin_frame* begin_frame);
 
 	/*
 	* @brief 游戏结束后调用，主函数中析构
@@ -76,11 +76,13 @@ public:
 
 	// 旋转方块
 	void rotate();
-
-	// 检查目标位置是否有碰撞
-	// 以行列偏移量（deltaRow, deltaColumn）为参数，用于在移动或旋转方块之前进行检测。
-	// 当准备向某个方向（左、右、下）移动或在旋转后变换坐标时，
-	// 只需根据新坐标计算出相对于当前坐标的偏移（或新位置），然后调用该函数检查是否有碰撞
+	/* 
+	* @param targetRow : 目标行， targetColumn : 目标列
+	* @brief 检查目标位置是否有碰撞
+	* 以行列偏移量（deltaRow, deltaColumn）为参数，用于在移动或旋转方块之前进行检测。
+	* 当准备向某个方向（左、右、下）移动或在旋转后变换坐标时，
+	* 只需根据新坐标计算出相对于当前坐标的偏移（或新位置），然后调用该函数检查是否有碰撞
+	*/
 	bool checkCollision(int targetRow, int targetColumn);
 
 	//游戏是否正在进行
@@ -114,6 +116,7 @@ public:
 	bool is_right;
 	bool is_space;
 	bool is_pause;
+	bool is_generate_end_game;
 
 	//方块矩阵
 	std::vector<std::vector<Block*>> block;
@@ -137,6 +140,10 @@ public:
 	int score_x_axis;
 	int score_y_axis;
 
+	//游戏暂停坐标
+	int pause_x_axis;
+	int pause_y_axis;
+
 	//下落速度
 	int SPEED;
 
@@ -146,6 +153,8 @@ public:
 
 
 private:
+	//主界面指针
+	Begin_frame* begin_frame;
 	//图片资源指针
 	Animation* animation;
 	//背景照片
@@ -204,4 +213,19 @@ private:
 	* @brief 判断游戏结束。当出现方块组合第一次溢出的时候，游戏结束
 	*/
 	void game_over();
+
+	/*
+	* @brief 生成残局
+	*/
+	void generate_end_game();
+
+	/*
+	* @brief 显示游戏暂停文字
+	*/
+	void draw_pause();
+
+	/*
+	* @brief 显示游戏结束文字
+	*/
+	void draw_game_over();
 };

@@ -3,12 +3,14 @@
 #include<random>
 #include<iostream>
 
-Frame::Frame(int map_width, int map_height, Animation* animation) {
+Frame::Frame(Animation* animation, Begin_frame* begin_frame) {
+	//获得主菜单指针
+	this->begin_frame = begin_frame;
 	//获得地图参数
-	this->map_height = map_height + 4;//前四行留给生成方块使用
-	this->map_width = map_width;
-	this->menu_width = map_width * Block::block_width / 4 + 200;
-	this->menu_height = map_height * Block::block_height;
+	this->map_height = begin_frame->map_height + 4;//前四行留给生成方块使用
+	this->map_width = begin_frame->map_width;
+	this->menu_width = begin_frame->map_width * Block::block_width / 4 + 200;
+	this->menu_height = begin_frame->map_height * Block::block_height;
 	this->frame_width = this->map_width * Block::block_width + menu_width;
 	this->frame_height = this->map_height * Block::block_height;
 
@@ -25,16 +27,21 @@ Frame::Frame(int map_width, int map_height, Animation* animation) {
 	is_right = false;
 	is_space = false;
 	is_pause = false;
+	is_generate_end_game = false;
 
 	//初始化得分
 	score = 0;
 
 	//初始化得分坐标
-	score_x_axis = this->map_width * Block::block_width + menu_width / 4;
+	score_x_axis = this->map_width * Block::block_width + menu_width / 5;
 	score_y_axis = 20;
 
+	//初始化暂停坐标
+	pause_x_axis = this->frame_width / 2 - 200;
+	pause_y_axis = this->frame_height / 2 - 100;
+
 	//初始化速度
-	SPEED = 1;
+	SPEED = 10;
 
 	//生成方块
 	initial_block();
@@ -89,7 +96,8 @@ void Frame::game_begin() {
 
 void Frame::game_over() {
 	running = false;
-	MessageBox(NULL, _T("Game Over"), _T("提示"), MB_OK);
+	renew_frame();
+	
 	exit(1);
 }
 
@@ -210,7 +218,6 @@ void Frame::generate_block_group() {
 
 void Frame::get_message(ExMessage& message) {
 
-	//下降速度过快，引入计时器，满足gap(5)再下落
 	int timer = 0;
 
 	while (running) {
@@ -230,6 +237,7 @@ void Frame::get_message(ExMessage& message) {
 				}
 				case VK_S: {
 					is_down = true;
+					break;
 				}
 				case VK_A: {
 					if (!is_right) {
@@ -254,6 +262,11 @@ void Frame::get_message(ExMessage& message) {
 					else {
 						is_pause = true;
 					}
+					break;
+				}
+				case VK_G: {
+					is_generate_end_game = true;
+					break;
 				}
 				default:
 					break;
@@ -269,6 +282,7 @@ void Frame::get_message(ExMessage& message) {
 					is_down = false;
 					//松下按键后刷新速度
 					SPEED = 1;
+					break;
 				}
 				case VK_A: {
 					is_left = false;
@@ -276,9 +290,14 @@ void Frame::get_message(ExMessage& message) {
 				}
 				case VK_D: {
 					is_right = false;
+					break;
 				}
 				case VK_SPACE: {
 					is_space = false;
+					break;
+				}
+				case VK_G: {
+					is_generate_end_game = false;
 					break;
 				}
 				default:
@@ -310,19 +329,20 @@ void Frame::get_message(ExMessage& message) {
 				renew_frame();
 			}
 
-			//下落SPEED行
-			if (timer % 10 == 0) {
-				for (int i = 0; i < SPEED; i++) {
-					moveDown();
-					renew_frame();
-				}
-				SPEED = 1;
-				timer %= 10;
+			//每隔 1000/speed ms下落一行
+			int timer_gap = (int)1000.0 / SPEED / 16.7;
+			if (timer % timer_gap == 0) {
+				moveDown();
+				renew_frame();
+				timer %= timer_gap;
 			}
+		}else {
+			//在暂停的情况下，生成残局
+			if (is_generate_end_game) {
+				generate_end_game();
+			}
+			renew_frame();
 		}
-
-		//更新为每步都刷新
-		//renew_frame();
 		
 		//结束时间
 		ULONGLONG end_time = GetTickCount64();
@@ -356,7 +376,7 @@ void Frame::check_line() {
 			if (flag) {
 				erase_line(i);
 				this->score += base;
-				base++;
+				base *= 2;
 				is_erase = true;
 				break;
 			}
@@ -420,6 +440,16 @@ void Frame::renew_frame() {
 	line(0, 4 * Block::block_height, map_width * Block::block_width, 4 * Block::block_height);
 	setlinecolor(BLACK);
 
+	//游戏是否结束
+	if (!running) {
+		draw_game_over();
+	}
+
+	//游戏是否暂停
+	if (is_pause) {
+		draw_pause();
+	} 
+
 	//显示
 	FlushBatchDraw();
 }
@@ -455,14 +485,58 @@ void Frame::draw_score() {
 	LOGFONT font_style;
 	gettextstyle(&font_style);
 	//更改字体样式
-	font_style.lfHeight = 16;
-	font_style.lfWeight = 16;
+	font_style.lfHeight = 30;
+	font_style.lfWeight = 30;
+	//设置背景透明
+	setbkmode(TRANSPARENT);
 	//设置字体样式
 	settextstyle(&font_style);
 	//设置颜色
 	settextcolor(RED);
 	//指定坐标显示
 	outtextxy(score_x_axis, score_y_axis, score_str);
+}
+
+void Frame::draw_pause() {
+	//存储要显示的字符串
+	static TCHAR pause_str[64];
+	//格式化字符串
+	_stprintf_s(pause_str, _T("游戏暂停"));
+	//获取当前字体样式
+	LOGFONT font_style;
+	gettextstyle(&font_style);
+	//更改字体样式
+	font_style.lfHeight = 100;
+	font_style.lfWeight = 100;
+	//设置背景透明
+	setbkmode(TRANSPARENT);
+	//设置字体样式
+	settextstyle(&font_style);
+	//设置颜色
+	settextcolor(RED);
+	//指定坐标显示
+	outtextxy(pause_x_axis, pause_y_axis, pause_str);
+}
+
+void Frame::draw_game_over() {
+	//存储要显示的字符串
+	static TCHAR pause_str[64];
+	//格式化字符串
+	_stprintf_s(pause_str, _T("游戏结束"));
+	//获取当前字体样式
+	LOGFONT font_style;
+	gettextstyle(&font_style);
+	//更改字体样式
+	font_style.lfHeight = 100;
+	font_style.lfWeight = 100;
+	//设置背景透明
+	setbkmode(TRANSPARENT);
+	//设置字体样式
+	settextstyle(&font_style);
+	//设置颜色
+	settextcolor(RED);
+	//指定坐标显示
+	outtextxy(pause_x_axis, pause_y_axis, pause_str);
 }
 
 void Frame::draw_block_group_png() {
@@ -519,7 +593,7 @@ void Frame::block_group_ground() {
 	//检查游戏结束
 	check_over_map();
 
-	//先检查是否可以消除
+	//检查是否可以消除
 	check_line();
 
 	//释放block_group
@@ -714,3 +788,6 @@ bool Frame::moveToLowestPosition()
 	return true;
 }
 
+void Frame::generate_end_game() {
+
+}
