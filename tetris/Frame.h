@@ -1,9 +1,8 @@
-#pragma once
 #include <wtypes.h>
 #include"Block.h"
 #include <vector>
-#include"Animation.h"
 #include"Begin_frame.h"
+#include"Animation.h"
 
 #define VK_W 0x57
 #define VK_S 0x53
@@ -14,9 +13,10 @@
 class Frame
 {
 public:
+
 	/*
 	* @brief 游戏初始化时构造，主函数中调用一次
-	* @param map_width: 横向可容纳方块的数量，map_height:纵向可容纳方块的数量
+	* @param animation: 资源类指针， begin_frame : 主界面指针
 	*/
 	Frame(Animation* animation, Begin_frame* begin_frame);
 
@@ -150,7 +150,8 @@ public:
 	//时间
 	int time;
 
-
+	//随机数种子
+	int seed;
 
 private:
 	//主界面指针

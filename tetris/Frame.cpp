@@ -1,5 +1,4 @@
 #include"Frame.h"
-#include"Block.h"
 #include<random>
 #include<iostream>
 
@@ -43,6 +42,9 @@ Frame::Frame(Animation* animation, Begin_frame* begin_frame) {
 	//初始化速度
 	SPEED = 10;
 
+	//初始化种子
+	seed = 1;
+
 	//生成方块
 	initial_block();
 
@@ -52,6 +54,7 @@ Frame::Frame(Animation* animation, Begin_frame* begin_frame) {
 
 	//初始化进行
 	running = false;
+
 }
 
 Frame::~Frame() {
@@ -59,6 +62,8 @@ Frame::~Frame() {
 }
 
 void Frame::game_begin() {
+
+	std::srand(this->seed);
 	//生成第一个方块组合
 	generate_block_group();
 
@@ -106,15 +111,15 @@ void Frame::generate_block_group() {
 	//刷新block_group
 	rewnew_block_group();
 
-	// 创建随机数生成引擎
-	std::random_device rd;  // 用于获取随机数种子
-	std::mt19937 gen(rd()); // Mersenne Twister 19937 演算法生成器
-	// 设置随机数分布范围
-	int start = 0;
-	int end = 6;
-	std::uniform_int_distribution<> dis(start, end); // 均匀分布
+	//// 创建随机数生成引擎
+	//std::random_device rd;  // 用于获取随机数种子
+	//std::mt19937 gen(rd()); // Mersenne Twister 19937 演算法生成器
+	//// 设置随机数分布范围
+	//int start = 0;
+	//int end = 6;
+	//std::uniform_int_distribution<> dis(start, end); // 均匀分布
 	// 生成随机数
-	int block_group_shape = dis(gen);
+	int block_group_shape = (int)((double)std::rand()/RAND_MAX * 7);
 
 	//测试用
 	//int block_group_shape = 4;
@@ -281,7 +286,7 @@ void Frame::get_message(ExMessage& message) {
 				case VK_S: {
 					is_down = false;
 					//松下按键后刷新速度
-					SPEED = 1;
+					SPEED = 6;
 					break;
 				}
 				case VK_A: {
@@ -322,7 +327,7 @@ void Frame::get_message(ExMessage& message) {
 				is_up = false;
 				renew_frame();
 			}
-			if (is_down) SPEED++;
+			if (is_down && SPEED <= 50) SPEED++;
 			if (is_space) {
 				moveToLowestPosition();
 				is_space = false;
