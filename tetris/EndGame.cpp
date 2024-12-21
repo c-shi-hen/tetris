@@ -2,11 +2,13 @@
 #include <iostream>
 #include <fstream>
 #include <regex>
+#include <easyx.h>
 
-EndGame::EndGame()
-    : mapWidth(10), mapHeight(20), initialLevel(1), initialSpeed(5),
+EndGame::EndGame(Animation* animation)
+    : mapWidth(10), mapHeight(20), initialLevel(1),
     map(20, std::vector<bool>(10, false)),
-    blockColors(20, std::vector<int>(10, -1)) {}
+    blockColors(20, std::vector<int>(10, -1)),
+    animation(animation) {}
 
 bool EndGame::isValid() const {
     return (mapWidth >= 8 && mapWidth <= 20) &&
@@ -17,27 +19,44 @@ bool EndGame::isValid() const {
         (mapWidth == blockColors[0].size());
 }
 
-void EndGame::updateFrame(int x, int y, bool placed, char type) {
-    std::cout << "更新地图：";
-    if (placed) {
-        std::cout << "放置方块 (" << x << ", " << y << ", 类型: " << type << ")\n";
-    }
-    else {
-        std::cout << "移除方块 (" << x << ", " << y << ")\n";
-    }
+void EndGame::visualizeEndGame() {
+    // 初始化图形窗口
+    int blockWidth = Block::block_width;
+    int blockHeight = Block::block_height;
+    int windowWidth = mapWidth * blockWidth;
+    int windowHeight = mapHeight * blockHeight;
 
-    // 打印当前地图
-    for (int i = 0; i < mapHeight; ++i) {
-        for (int j = 0; j < mapWidth; ++j) {
-            if (map[i][j]) {
-                std::cout << 0 << " ";
-            }
-            else {
-                std::cout << ". ";
+    // 初始化窗口
+    initgraph(windowWidth, windowHeight);
+    SetWindowText(GetHWnd(), L"残局地图编辑器");
+
+    cleardevice();
+
+    // 绘制背景
+    putimage(0, 0, &animation->back_ground); // 直接使用 &animation->back_ground
+
+    // 绘制每个方块
+    for (int row = 0; row < mapHeight; ++row) {
+        for (int col = 0; col < mapWidth; ++col) {
+            if (map[row][col]) {
+                Block tempBlock(row, col, &animation->block_png);
+                tempBlock.is_block = true;
+                tempBlock.color = blockColors[row][col];
+                tempBlock.show();
             }
         }
-        std::cout << "\n";
     }
+
+    // 绘制网格线
+    setlinecolor(WHITE);
+    for (int i = 0; i <= mapWidth; ++i) {
+        line(i * blockWidth, 0, i * blockWidth, mapHeight * blockHeight);
+    }
+    for (int i = 0; i <= mapHeight; ++i) {
+        line(0, i * blockHeight, mapWidth * blockWidth, i * blockHeight);
+    }
+
+    FlushBatchDraw();
 }
 
 bool EndGame::createEndGame() {
@@ -90,6 +109,8 @@ bool EndGame::createEndGame() {
 
     // 用户交互式编辑地图
     while (true) {
+        visualizeEndGame(); // 实时可视化地图
+
         std::cout << "请输入指令（P X Y Type 放置方块，D X Y 删除方块，f 保存并退出，q 取消）：";
         std::string cmd;
         std::cin >> cmd;
@@ -100,10 +121,9 @@ bool EndGame::createEndGame() {
             std::cin >> x >> y >> type;
             if (x >= 1 && x <= mapWidth && y >= 1 && y <= mapHeight) {
                 map[y - 1][x - 1] = true;
-                blockColors[y - 1][x - 1] = type;
+                blockColors[y - 1][x - 1] = type - '0';
 
-                // 调用更新方法
-                updateFrame(x, y, true, type);
+                visualizeEndGame(); // 更新界面
             }
             else {
                 std::cout << "位置超出范围！" << std::endl;
@@ -116,8 +136,7 @@ bool EndGame::createEndGame() {
                 map[y - 1][x - 1] = false;
                 blockColors[y - 1][x - 1] = -1;
 
-                // 调用更新方法
-                updateFrame(x, y, false, -1);
+                visualizeEndGame(); // 更新界面
             }
             else {
                 std::cout << "位置超出范围！" << std::endl;
@@ -127,6 +146,7 @@ bool EndGame::createEndGame() {
             std::string filePath = "endgames/" + endGameName + ".end";
             if (saveToFile(filePath)) {
                 std::cout << "残局保存成功: " << filePath << std::endl;
+                closegraph(); // 关闭图形界面
                 return true;
             }
             else {
@@ -136,6 +156,7 @@ bool EndGame::createEndGame() {
         }
         else if (cmd == "q") {
             std::cout << "取消创建残局。" << std::endl;
+            closegraph(); // 关闭图形界面
             return false;
         }
         else {
@@ -152,7 +173,6 @@ bool EndGame::saveToFile(const std::string& filename) const {
 
     ofs << mapWidth << " " << mapHeight << "\n";
     ofs << initialLevel << "\n";
-    ofs << initialSpeed << "\n";
 
     for (int y = 0; y < mapHeight; ++y) {
         for (int x = 0; x < mapWidth; ++x) {
@@ -166,35 +186,50 @@ bool EndGame::saveToFile(const std::string& filename) const {
     return true;
 }
 
+
+void EndGame::applyToBlocks(std::vector<std::vector<Block*>>& blocks, int& level, int& speed) {
+    if (blocks.size() != mapHeight || blocks[0].size() != mapWidth) {
+        throw std::invalid_argument("Block grid size does not match the EndGame map size.");
+    }
+
+    for (int row = 0; row < mapHeight; ++row) {
+        for (int col = 0; col < mapWidth; ++col) {
+            blocks[row][col]->is_block = map[row][col];
+            blocks[row][col]->color = blockColors[row][col];
+        }
+    }
+
+    // 设置初始关卡和速度
+    level = initialLevel;
+    speed = 1000 - (level - 1) * 100; // 根据关卡调整速度
+}
+
 bool EndGame::loadFromFile(const std::string& filename) {
-    std::ifstream ifs(filename);
-    if (!ifs.is_open()) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "无法打开文件：" << filename << std::endl;
         return false;
     }
 
-    ifs >> mapWidth >> mapHeight >> initialLevel >> initialSpeed;
-    if (ifs.fail() || mapWidth < 8 || mapWidth > 20 || mapHeight < 8 || mapHeight > 20 || initialLevel < 1 || initialSpeed < 1) {
-        return false;
-    }
+    file >> mapWidth >> mapHeight >> initialLevel;
 
+    // 初始化地图
     map.assign(mapHeight, std::vector<bool>(mapWidth, false));
     blockColors.assign(mapHeight, std::vector<int>(mapWidth, -1));
 
     std::string command;
-    while (ifs >> command) {
-        if (command == "f") {
-            break;
+    while (file >> command) {
+        if (command == "P") {
+            int x, y, color;
+            file >> x >> y >> color;
+            map[y - 1][x - 1] = true;
+            blockColors[y - 1][x - 1] = color;
         }
-        else if (command == "P") {
-            int x, y;
-            char type;
-            ifs >> x >> y >> type;
-            if (x >= 1 && x <= mapWidth && y >= 1 && y <= mapHeight) {
-                map[y - 1][x - 1] = true;
-                blockColors[y - 1][x - 1] = type;
-            }
+        else if (command == "f") {
+            break; // 结束指令
         }
     }
 
+    file.close();
     return true;
 }

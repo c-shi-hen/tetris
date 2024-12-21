@@ -36,10 +36,15 @@ void runGame() {
 }
 
 int main() {
-    // 确保 config 目录存在
+    // 确保 config 和 endgames 目录存在
     const std::string configDir = "config";
+    const std::string endgameDir = "endgames";
     if (!fs::exists(configDir) && !fs::create_directories(configDir)) {
         std::cerr << "无法创建 'config' 目录。" << std::endl;
+        return 1;
+    }
+    if (!fs::exists(endgameDir) && !fs::create_directories(endgameDir)) {
+        std::cerr << "无法创建 'endgames' 目录。" << std::endl;
         return 1;
     }
 
@@ -103,8 +108,6 @@ int main() {
                 if (my_begin_frame0->loadConfig(filepath)) {
                     std::cout << "配置文件加载成功：" << filepath << std::endl;
 
-                    
-
                     // 启动游戏
                     Sleep(100);
                     closegraph(); // 关闭主菜单窗口
@@ -118,6 +121,63 @@ int main() {
 
             // 返回主菜单界面
             continue;
+        }
+
+        if (menuMsg.createEndGame) {
+            // 创建残局
+            EndGame endGame(animation0); // 传递 Animation 对象
+            if (endGame.createEndGame()) {
+                std::cout << "残局创建完成。" << std::endl;
+            }
+            else {
+                std::cout << "残局创建失败或取消。" << std::endl;
+            }
+
+            // 返回主菜单界面
+            break;
+        }
+
+        if (menuMsg.challengeEndGame) {
+            // 加载残局并挑战
+            std::string endGameFile;
+            std::cout << "请输入要加载的残局文件名（不包括路径,后缀，直接输入文件名，输入 'q' 退出）：";
+            std::cin >> endGameFile;
+
+            if (endGameFile == "q") {
+                std::cout << "取消加载残局。" << std::endl;
+                continue;
+            }
+
+            std::string filepath = endgameDir + "/" + endGameFile + ".end";
+            EndGame endGame(animation0);
+            if (endGame.loadFromFile(filepath)) {
+                std::cout << "残局加载成功：" << filepath << std::endl;
+
+                // 初始化游戏框架
+                Frame* frame = new Frame(animation0, my_begin_frame0);
+
+                //// 将残局数据应用到方块网格
+                //try {
+                //    endGame.applyToBlocks(frame->block, my_begin_frame0->initialLevel, frame->SPEED);
+                    
+                    /*SetWindowText(initgraph(frame->frame_width, frame->frame_height), L"俄罗斯方块");
+                    BeginBatchDraw();
+                    frame->game_begin();
+                    EndBatchDraw();
+                    closegraph();*/
+                }
+                catch (const std::exception& e) {
+                    std::cerr << "错误：无法加载残局到游戏框架。" << std::endl;
+                    delete frame;
+                    continue;
+                }
+
+                delete frame;
+                break; // 退出主菜单循环
+            }
+            else {
+                std::cout << "残局加载失败，文件可能不存在或格式错误。" << std::endl;
+            }
         }
 
         // 重置消息状态
