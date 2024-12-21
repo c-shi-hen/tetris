@@ -14,9 +14,10 @@
 class Frame
 {
 public:
+
 	/*
 	* @brief 游戏初始化时构造，主函数中调用一次
-	* @param map_width: 横向可容纳方块的数量，map_height:纵向可容纳方块的数量
+	* @param animation: 资源类指针， begin_frame : 主界面指针
 	*/
 	Frame(Animation* animation, Begin_frame* begin_frame);
 
@@ -76,7 +77,7 @@ public:
 
 	// 旋转方块
 	void rotate();
-	/* 
+	/*
 	* @param targetRow : 目标行， targetColumn : 目标列
 	* @brief 检查目标位置是否有碰撞
 	* 以行列偏移量（deltaRow, deltaColumn）为参数，用于在移动或旋转方块之前进行检测。
@@ -147,10 +148,15 @@ public:
 	//下落速度
 	int SPEED;
 
-	//时间
-	int time;
+	//随机数种子
+	int seed;
+	
+	//关卡数
+	int level;
 
-
+	//残局信息
+	std::vector<std::vector<bool>> map;           // 地图状态
+	std::vector<std::vector<int>> blockColors;    // 方块颜色
 
 private:
 	//主界面指针

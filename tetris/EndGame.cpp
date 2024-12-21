@@ -4,11 +4,14 @@
 #include <regex>
 #include <easyx.h>
 
-EndGame::EndGame(Animation* animation)
-    : mapWidth(10), mapHeight(20), initialLevel(1),
-    map(20, std::vector<bool>(10, false)),
-    blockColors(20, std::vector<int>(10, -1)),
-    animation(animation) {}
+EndGame::EndGame(int map_height, int map_width, int level, std::vector<std::vector<bool>> map, std::vector<std::vector<int>> blockColors) {
+
+}
+
+EndGame::EndGame(Animation* animation) {
+    //获取图片资源
+    this->animation = animation;
+}
 
 bool EndGame::isValid() const {
     return (mapWidth >= 8 && mapWidth <= 20) &&
@@ -184,24 +187,6 @@ bool EndGame::saveToFile(const std::string& filename) const {
 
     ofs << "f\n";
     return true;
-}
-
-
-void EndGame::applyToBlocks(std::vector<std::vector<Block*>>& blocks, int& level, int& speed) {
-    if (blocks.size() != mapHeight || blocks[0].size() != mapWidth) {
-        throw std::invalid_argument("Block grid size does not match the EndGame map size.");
-    }
-
-    for (int row = 0; row < mapHeight; ++row) {
-        for (int col = 0; col < mapWidth; ++col) {
-            blocks[row][col]->is_block = map[row][col];
-            blocks[row][col]->color = blockColors[row][col];
-        }
-    }
-
-    // 设置初始关卡和速度
-    level = initialLevel;
-    speed = 1000 - (level - 1) * 100; // 根据关卡调整速度
 }
 
 bool EndGame::loadFromFile(const std::string& filename) {

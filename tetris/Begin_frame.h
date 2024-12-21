@@ -14,9 +14,17 @@ class Begin_frame
 public:
 
 	Begin_frame(Animation* animation);
-	Begin_frame();
 	~Begin_frame();
+
+	/*
+	* @brief 初始化游戏主界面
+	*/
 	void initial();
+
+	/*
+	* @brief 默认参数
+	*/
+	void default_param();
 
 	int gameSpeed;
 	int randomSeed;
@@ -27,11 +35,21 @@ public:
 	const int begin_frame_width = 800;
 	//默认窗口高度
 	const int begin_frame_height = 800;
-	//默认地图大小
+	//地图大小
 	int map_width;
 	int map_height;
-private:
+
+	//残局信息
+	std::vector<std::vector<bool>> map;           // 地图状态
+	std::vector<std::vector<int>> blockColors;    // 方块颜色
+
+	//资源指针
+	Animation* animation;
 	IMAGE* background;
+
+	/*
+	* @brief 绘制地图背景
+	*/
 	void inline draw_backgroud();
 
 public:
@@ -43,13 +61,17 @@ public:
 		bool challengeEndGame = false;
 		bool createEndGame = false;
 	};
-
+	// 主菜单消息循环
+	MainMenuMessage menuMsg;
 	bool getMainMenuMessage(MainMenuMessage& msg);
-
-	void drawMainMenu() ;
 
 public:
 	
+	/*
+	* @brief 绘制菜单
+	*/
+	void inline draw_menu();
+
 	// 加载指定配置文件
 	bool loadConfig(const std::string& filename);
 

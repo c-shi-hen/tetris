@@ -18,6 +18,14 @@ public:
     bool isValid() const;
 
 public:
+    /*
+    * @brief 游戏中生成残局
+    */
+    EndGame(int map_height, int map_width, int level, std::vector<std::vector<bool>> map, std::vector<std::vector<int>> blockColors);
+
+    /*
+    * @brief 手动创建残局
+    */
     EndGame(Animation* animation);
 
     // 创建残局
@@ -33,5 +41,5 @@ public:
     void visualizeEndGame();
 
     // 将残局数据应用到方块网格
-    void applyToBlocks(std::vector<std::vector<Block*>>& blocks, int& level, int& speed);
+    //void applyToBlocks(std::vector<std::vector<Block*>>& blocks, int& level, int& speed);
 };

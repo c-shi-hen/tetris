@@ -2,10 +2,14 @@
 #include"Block.h"
 #include<random>
 #include<iostream>
+#include"EndGame.h"
+
 
 Frame::Frame(Animation* animation, Begin_frame* begin_frame) {
+
 	//获得主菜单指针
 	this->begin_frame = begin_frame;
+
 	//获得地图参数
 	this->map_height = begin_frame->map_height + 4;//前四行留给生成方块使用
 	this->map_width = begin_frame->map_width;
@@ -20,45 +24,79 @@ Frame::Frame(Animation* animation, Begin_frame* begin_frame) {
 	this->block_group_png = &animation->block_group_png;
 
 	//初始化消息
-	message = {};
-	is_up = false;
-	is_down = false;
-	is_left = false;
-	is_right = false;
-	is_space = false;
-	is_pause = false;
-	is_generate_end_game = false;
+	this->message = {};
+	this->is_up = false;
+	this->is_down = false;
+	this->is_left = false;
+	this->is_right = false;
+	this->is_space = false;
+	this->is_pause = false;
+	this->is_generate_end_game = false;
 
 	//初始化得分
-	score = 0;
+	this->score = 0;
 
 	//初始化得分坐标
-	score_x_axis = this->map_width * Block::block_width + menu_width / 5;
-	score_y_axis = 20;
+	this->score_x_axis = this->map_width * Block::block_width + menu_width / 5;
+	this->score_y_axis = 20;
 
 	//初始化暂停坐标
-	pause_x_axis = this->frame_width / 2 - 200;
-	pause_y_axis = this->frame_height / 2 - 100;
+	this->pause_x_axis = this->frame_width / 2 - 200;
+	this->pause_y_axis = this->frame_height / 2 - 100;
 
 	//初始化速度
-	SPEED = 10;
+	this->SPEED = begin_frame->gameSpeed;
+
+	//初始化种子
+	this->seed = begin_frame->randomSeed;
+
+	//初始化关卡
+	this->level = begin_frame->initialLevel;
+
+	//初始化方块组合图片的坐标
+	this->next_group_block_x_axis = this->map_width * Block::block_width + menu_width / 4;
+	this->next_group_block_y_axis = 100;
+
+	//初始化进行
+	this->running = false;
+
+	//获取残局信息
+	this->map = begin_frame->map;
+	this->blockColors = begin_frame->blockColors;
 
 	//生成方块
 	initial_block();
-
-	//初始化方块组合图片的坐标
-	next_group_block_x_axis = this->map_width * Block::block_width + menu_width / 4;
-	next_group_block_y_axis = 100;
-
-	//初始化进行
-	running = false;
 }
 
 Frame::~Frame() {
+	//释放方块对象
+	for (int i = 0; i < map_height; i++) {
+		for (int j = 0; j < map_width; j++) {
+			delete block[i][j];
+		}
+	}
+	//释放当前正在下落的方块
+	delete_block_group();
+
+	//释放下一个方块组合
+	for(int i = 0; i < next_block_group.size(); i++){
+		for (int j = 0; j < next_block_group[i].size(); j++) {
+			delete next_block_group[i][j];
+		}
+	}
 
 }
 
 void Frame::game_begin() {
+
+	//初始化种子
+	//创建随机数生成引擎
+
+	if (seed != -1){
+		std::srand(this->seed);
+	}
+	
+
 	//生成第一个方块组合
 	generate_block_group();
 
@@ -97,8 +135,6 @@ void Frame::game_begin() {
 void Frame::game_over() {
 	running = false;
 	renew_frame();
-	
-	exit(1);
 }
 
 void Frame::generate_block_group() {
@@ -106,15 +142,20 @@ void Frame::generate_block_group() {
 	//刷新block_group
 	rewnew_block_group();
 
-	// 创建随机数生成引擎
-	std::random_device rd;  // 用于获取随机数种子
-	std::mt19937 gen(rd()); // Mersenne Twister 19937 演算法生成器
-	// 设置随机数分布范围
-	int start = 0;
-	int end = 6;
-	std::uniform_int_distribution<> dis(start, end); // 均匀分布
 	// 生成随机数
-	int block_group_shape = dis(gen);
+	int block_group_shape;
+	if (seed != -1) {
+		block_group_shape = (int)((double)std::rand() / RAND_MAX * 7);
+	}
+	else {
+		std::random_device rd;  // 用于获取随机数种子
+		std::mt19937 gen(rd()); // Mersenne Twister 19937 演算法生成器
+		// 设置随机数分布范围
+		int start = 0;
+		int end = 6;
+		std::uniform_int_distribution<> dis(start, end); // 均匀分布
+		block_group_shape = dis(gen);
+	}
 
 	//测试用
 	//int block_group_shape = 4;
@@ -211,6 +252,7 @@ void Frame::generate_block_group() {
 	}
 	default:
 		//程序出错，直接退出
+		std::cout << "未能生成新方块，随机数种子出错" << std::endl;
 		exit(0);
 		break;
 	}
@@ -219,15 +261,16 @@ void Frame::generate_block_group() {
 void Frame::get_message(ExMessage& message) {
 
 	int timer = 0;
-
+	int temp_speed = SPEED + level;
 	while (running) {
 
 		timer++;
 		//动态延时优化性能，保证每次循环执行的时间高于帧率
 		//开始时间
 		ULONGLONG begin_time = GetTickCount64();
+		
 		while (peekmessage(&message)) {
-			std::cout << "get keydown" << toascii(message.vkcode) << std::endl;
+			
 			if (message.message == WM_KEYDOWN) {
 				//每个按键单独处理
 				switch (message.vkcode) {
@@ -281,7 +324,7 @@ void Frame::get_message(ExMessage& message) {
 				case VK_S: {
 					is_down = false;
 					//松下按键后刷新速度
-					SPEED = 1;
+					temp_speed = SPEED + level;
 					break;
 				}
 				case VK_A: {
@@ -322,7 +365,7 @@ void Frame::get_message(ExMessage& message) {
 				is_up = false;
 				renew_frame();
 			}
-			if (is_down) SPEED++;
+			if (is_down && temp_speed <= 50) temp_speed++;
 			if (is_space) {
 				moveToLowestPosition();
 				is_space = false;
@@ -330,20 +373,21 @@ void Frame::get_message(ExMessage& message) {
 			}
 
 			//每隔 1000/speed ms下落一行
-			int timer_gap = (int)1000.0 / SPEED / 16.7;
+			int timer_gap = (int)1000.0 / temp_speed / 16.7;
 			if (timer % timer_gap == 0) {
 				moveDown();
 				renew_frame();
 				timer %= timer_gap;
 			}
-		}else {
+		}
+		else {
 			//在暂停的情况下，生成残局
 			if (is_generate_end_game) {
 				generate_end_game();
 			}
 			renew_frame();
 		}
-		
+
 		//结束时间
 		ULONGLONG end_time = GetTickCount64();
 		//如果执行时间低于帧间隔，阻塞所缺时间，帧率设置为60
@@ -382,6 +426,11 @@ void Frame::check_line() {
 			}
 		}
 	}
+
+	//判断当前得分，提升关卡难度。每次获得十分，就增加一次关卡难度
+	if (score > (10 * level)) {
+		level++;
+	}
 }
 
 void Frame::erase_line(int row) {
@@ -400,16 +449,27 @@ void Frame::erase_line(int row) {
 	}
 }
 
-void inline Frame::draw_backgroud() {
+void Frame::draw_backgroud() {
 	putimage(0, 0, this->background);
 }
 
-void inline Frame::initial_block() {
-	for (int i = 0; i < map_height; i++) {
+void Frame::initial_block() {
+
+	for (int i = 0; i < 4; i++) {
 		std::vector<Block*> block_line;
 		for (int j = 0; j < map_width; j++) {
 			Block* temp = new Block(i, j, &this->animation->block_png);
-			temp->is_block = false;
+			block_line.push_back(temp);
+		}
+		block.push_back(block_line);
+	}
+
+	for (int i = 4; i < map_height; i++) {
+		std::vector<Block*> block_line;
+		for (int j = 0; j < map_width; j++) {
+			Block* temp = new Block(i, j, &this->animation->block_png);
+			temp->is_block = this->map[i - 4][j];
+			temp->color = this->blockColors[i - 4][j];
 			block_line.push_back(temp);
 		}
 		block.push_back(block_line);
@@ -448,32 +508,27 @@ void Frame::renew_frame() {
 	//游戏是否暂停
 	if (is_pause) {
 		draw_pause();
-	} 
+	}
 
 	//显示
 	FlushBatchDraw();
 }
 
 void Frame::draw_block() {
+
 	//绘制棋盘本身
-	std::cout << "------------------------" << std::endl;
-	std::cout << "block" << std::endl;
 	for (int i = 0; i < map_height; i++) {
 		for (int j = 0; j < map_width; j++) {
 			block[i][j]->show();
 		}
 	}
-	std::cout << "------------------------" << std::endl;
+
 	//绘制当前下落组合
-	std::cout << "------------------------" << std::endl;
-	std::cout << "block_group" << std::endl;
-	std::cout << "------------------------" << std::endl;
 	for (auto& x : block_group) {
 		for (auto& y : x) {
 			y->show();
 		}
 	}
-	std::cout << "------------------------" << std::endl;
 }
 
 void Frame::draw_score() {
@@ -593,7 +648,7 @@ void Frame::block_group_ground() {
 	//检查游戏结束
 	check_over_map();
 
-	//检查是否可以消除
+	//检查是否可以消除并消除
 	check_line();
 
 	//释放block_group
@@ -789,5 +844,27 @@ bool Frame::moveToLowestPosition()
 }
 
 void Frame::generate_end_game() {
+	//更新残局所需要的参数
+	for (int i = 4; i < map_height; i++) {
+		for (int j = 0; j < map_width; j++) {
+			this->map[i - 4][j] = block[i][j]->is_block;
+			this->blockColors[i - 4][j] = block[i][j]->color;
+		}
+	}
 
+	//创建一个end_game对象
+	EndGame end_game(this->map_height, this->map_width, this->level, this->map, this->blockColors);
+	std::string filename;
+	std::cout << "请输入残局文件名: ";
+	while (std::cin >> filename) {
+		if (end_game.saveToFile(filename)) {
+			std::cout << "创建成功" << std::endl;
+			std::cout << "请继续游戏" << std::endl;
+			break;
+		}
+		else {
+			std::cout << "创建失败，请再试一次" << std::endl;
+			std::cout << "请输入残局文件名: ";
+		}
+	}
 }
