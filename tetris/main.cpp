@@ -81,12 +81,14 @@ int main() {
             }
             else {
                 std::cout << "新配置创建失败或取消。" << std::endl;
+                
             }
             // 返回主菜单界面
             begin_frame->menuMsg.createConfig = false;
             begin_frame->initial();
             continue;
         }
+
         // 加载配置文件
         if (begin_frame->menuMsg.loadConfig) {
             EndBatchDraw();
@@ -138,6 +140,7 @@ int main() {
             begin_frame->initial();
             continue;
         }
+
         // 加载残局并挑战
         if (begin_frame->menuMsg.challengeEndGame) {
             EndBatchDraw();
@@ -175,6 +178,8 @@ int main() {
             if (is_load) runGame(begin_frame);
             begin_frame->menuMsg.challengeEndGame = false;
             begin_frame->initial();
+
+            continue;
         }
         FlushBatchDraw();
 

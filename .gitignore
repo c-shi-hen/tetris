@@ -6,6 +6,9 @@
 # 忽略配置文件
 *.config
 
+# 忽略残局文件
+*.end
+
 # User-specific files
 *.rsuser
 *.suo

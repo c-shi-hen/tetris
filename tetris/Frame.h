@@ -10,6 +10,7 @@
 #define VK_A 0x41
 #define VK_D 0x44
 #define VK_G 0x47
+#define VK_P 0x50
 
 class Frame
 {
@@ -65,6 +66,16 @@ public:
 	void draw_score();
 
 	/*
+	*@brief 显示速度
+	*/
+	void draw_speed();
+
+	/*
+	*@brief 显示关卡
+	*/
+	void draw_level();
+
+	/*
 	*@brief 显示下一个方块组合的照片
 	*/
 	void draw_block_group_png();
@@ -118,6 +129,7 @@ public:
 	bool is_space;
 	bool is_pause;
 	bool is_generate_end_game;
+	bool is_over;
 
 	//方块矩阵
 	std::vector<std::vector<Block*>> block;
@@ -145,6 +157,14 @@ public:
 	int pause_x_axis;
 	int pause_y_axis;
 
+	//速度坐标
+	int speed_x_axis;
+	int speed_y_aixs;
+	
+	//关卡难度坐标
+	int level_x_axis;
+	int level_y_axis;
+
 	//下落速度
 	int SPEED;
 
@@ -155,10 +175,11 @@ public:
 	int level;
 
 	//残局信息
-	std::vector<std::vector<bool>> map;           // 地图状态
-	std::vector<std::vector<int>> blockColors;    // 方块颜色
+	// 地图状态
+	std::vector<std::vector<bool>> map;
+	// 方块颜色
+	std::vector<std::vector<int>> blockColors;    
 
-private:
 	//主界面指针
 	Begin_frame* begin_frame;
 	//图片资源指针
@@ -172,8 +193,6 @@ private:
 	{
 		S, Z, L, J, I, O, T//方块组合，待定，仍可添加，顺序和加载方块图片的顺序一致
 	};
-
-private:
 
 	/*
 	* @brief 绘制地图背景

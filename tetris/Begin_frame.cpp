@@ -84,12 +84,16 @@ void Begin_frame::draw_menu() {
     TCHAR prompt2[] = _T("按 'Q' 退出游戏");
     TCHAR prompt3[] = _T("按 'I' 新建配置");
     TCHAR prompt4[] = _T("按 'U' 加载配置");
+    TCHAR prompt5[] = _T("按 'N' 创建残局");
+    TCHAR prompt6[] = _T("按 'M' 加载残局");
 
     int titleWidth = textwidth(title);
     int prompt1Width = textwidth(prompt1);
     int prompt2Width = textwidth(prompt2);
     int prompt3Width = textwidth(prompt3);
     int prompt4Width = textwidth(prompt4);
+    int prompt5Width = textwidth(prompt5);
+    int prompt6Width = textwidth(prompt6);
     setbkmode(TRANSPARENT);
 
     outtextxy((getwidth() - titleWidth) / 2, getheight() / 2 - 120, title);
@@ -98,6 +102,8 @@ void Begin_frame::draw_menu() {
     outtextxy((getwidth() - prompt2Width) / 2, getheight() / 2 + 20, prompt2);
     outtextxy((getwidth() - prompt3Width) / 2, getheight() / 2 + 60, prompt3);
     outtextxy((getwidth() - prompt4Width) / 2, getheight() / 2 + 100, prompt4);
+    outtextxy((getwidth() - prompt5Width) / 2, getheight() / 2 + 140, prompt5);
+    outtextxy((getwidth() - prompt6Width) / 2, getheight() / 2 + 180, prompt6);
 
 }
 
@@ -192,12 +198,12 @@ bool Begin_frame::loadConfig(const std::string& filename) {
                     randomSeed = value; // 第三行为 randomSeed
                 }
                 else {
-                    std::cerr << "配置文件中多余的行: " << line << std::endl;
+                    std::cout << "配置文件中多余的行: " << line << std::endl;
                 }
                 count++;
             }
             catch (const std::invalid_argument&) {
-                std::cerr << "配置文件中存在无效值: " << line << std::endl;
+                std::cout << "配置文件中存在无效值: " << line << std::endl;
                 return false;
             }
         }
@@ -206,7 +212,7 @@ bool Begin_frame::loadConfig(const std::string& filename) {
 
         // 确保文件包含了所有必需的配置项
         if (count < 3) {
-            std::cerr << "配置文件中缺少必要的配置项。" << std::endl;
+            std::cout << "配置文件中缺少必要的配置项。" << std::endl;
             return false;
         }
 
@@ -218,7 +224,7 @@ bool Begin_frame::loadConfig(const std::string& filename) {
         return true;
     }
     catch (const std::exception& e) {
-        std::cerr << "加载配置失败: " << e.what() << std::endl;
+        std::cout << "加载配置失败: " << e.what() << std::endl;
         return false;
     }
 }
@@ -258,7 +264,7 @@ bool Begin_frame::createConfig() {
 
     std::regex validName("^[A-Za-z0-9_]+$");
     if (!std::regex_match(name, validName)) {
-        std::cerr << "无效的配置名称。\n";
+        std::cout << "无效的配置名称。\n";
         return false;
     }
 
@@ -269,14 +275,14 @@ bool Begin_frame::createConfig() {
     std::cout << "请输入游戏速度 (1-10)：";
     std::cin >> gameSpeed;
     if (gameSpeed < 1 || gameSpeed > 10) {
-        std::cerr << "无效的游戏速度值，必须在 1-10 之间。\n";
+        std::cout << "无效的游戏速度值，必须在 1-10 之间。\n";
         return false;
     }
 
     std::cout << "请输入初始关卡 (>= 1)：";
     std::cin >> initialLevel;
     if (initialLevel < 1) {
-        std::cerr << "无效的初始关卡值，必须大于等于 1。\n";
+        std::cout << "无效的初始关卡值，必须大于等于 1。\n";
         return false;
     }
 
@@ -287,7 +293,7 @@ bool Begin_frame::createConfig() {
     std::string filename = "config/" + name + ".config";
     std::ofstream outfile(filename);
     if (!outfile.is_open()) {
-        std::cerr << "无法创建配置文件。\n";
+        std::cout << "无法创建配置文件。\n";
         return false;
     }
 
@@ -327,7 +333,7 @@ void Begin_frame::setConfig(const std::string& key, const std::string& value) {
         configMap[key] = value;
     }
     else {
-        std::cerr << "无效的配置值: " << key << "=" << value << std::endl;
+        std::cout << "无效的配置值: " << key << "=" << value << std::endl;
     }
 }
 

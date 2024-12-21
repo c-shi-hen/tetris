@@ -32,6 +32,7 @@ Frame::Frame(Animation* animation, Begin_frame* begin_frame) {
 	this->is_space = false;
 	this->is_pause = false;
 	this->is_generate_end_game = false;
+	this->is_over = false;
 
 	//初始化得分
 	this->score = 0;
@@ -39,6 +40,14 @@ Frame::Frame(Animation* animation, Begin_frame* begin_frame) {
 	//初始化得分坐标
 	this->score_x_axis = this->map_width * Block::block_width + menu_width / 5;
 	this->score_y_axis = 20;
+
+	//初始化速度坐标
+	this->speed_x_axis = this->map_width * Block::block_width + menu_width / 5;
+	this->speed_y_aixs = 60;
+	
+	//初始化关卡坐标
+	this->level_x_axis = this->map_width * Block::block_width + menu_width / 5;
+	this->level_y_axis = 100;
 
 	//初始化暂停坐标
 	this->pause_x_axis = this->frame_width / 2 - 200;
@@ -54,8 +63,8 @@ Frame::Frame(Animation* animation, Begin_frame* begin_frame) {
 	this->level = begin_frame->initialLevel;
 
 	//初始化方块组合图片的坐标
-	this->next_group_block_x_axis = this->map_width * Block::block_width + menu_width / 4;
-	this->next_group_block_y_axis = 100;
+	this->next_group_block_x_axis = this->map_width * Block::block_width + menu_width / 6;
+	this->next_group_block_y_axis = 200;
 
 	//初始化进行
 	this->running = false;
@@ -91,12 +100,10 @@ void Frame::game_begin() {
 
 	//初始化种子
 	//创建随机数生成引擎
-
 	if (seed != -1){
 		std::srand(this->seed);
 	}
 	
-
 	//生成第一个方块组合
 	generate_block_group();
 
@@ -111,6 +118,12 @@ void Frame::game_begin() {
 
 	//绘制得分
 	draw_score();
+
+	//绘制速度
+	draw_speed();
+
+	//绘制关卡
+	draw_level();
 
 	//生成第二个方块组合
 	generate_block_group();
@@ -261,9 +274,9 @@ void Frame::generate_block_group() {
 void Frame::get_message(ExMessage& message) {
 
 	int timer = 0;
-	int temp_speed = SPEED + level;
 	while (running) {
 
+		int temp_speed = SPEED + level;
 		timer++;
 		//动态延时优化性能，保证每次循环执行的时间高于帧率
 		//开始时间
@@ -309,6 +322,12 @@ void Frame::get_message(ExMessage& message) {
 				}
 				case VK_G: {
 					is_generate_end_game = true;
+					break;
+				}
+				case VK_P: {
+					if (is_pause) {
+						is_over = true;
+					}
 					break;
 				}
 				default:
@@ -386,6 +405,10 @@ void Frame::get_message(ExMessage& message) {
 				generate_end_game();
 			}
 			renew_frame();
+
+			if (is_over) {
+				game_over();
+			}
 		}
 
 		//结束时间
@@ -489,6 +512,12 @@ void Frame::renew_frame() {
 	//绘制得分
 	draw_score();
 
+	//绘制速度
+	draw_speed();
+
+	//绘制关卡
+	draw_level();
+
 	//绘制下一个方块组合的图片
 	draw_block_group_png();
 
@@ -540,8 +569,8 @@ void Frame::draw_score() {
 	LOGFONT font_style;
 	gettextstyle(&font_style);
 	//更改字体样式
-	font_style.lfHeight = 30;
-	font_style.lfWeight = 30;
+	font_style.lfHeight = 25;
+	font_style.lfWeight = 25;
 	//设置背景透明
 	setbkmode(TRANSPARENT);
 	//设置字体样式
@@ -550,6 +579,48 @@ void Frame::draw_score() {
 	settextcolor(RED);
 	//指定坐标显示
 	outtextxy(score_x_axis, score_y_axis, score_str);
+}
+
+void Frame::draw_speed() {
+	//存储要显示的字符串
+	static TCHAR speed_str[64];
+	//格式化字符串
+	_stprintf_s(speed_str, _T("游戏基础速度：%d"), SPEED);
+	//获取当前字体样式
+	LOGFONT font_style;
+	gettextstyle(&font_style);
+	//更改字体样式
+	font_style.lfHeight = 25;
+	font_style.lfWeight = 25;
+	//设置背景透明
+	setbkmode(TRANSPARENT);
+	//设置字体样式
+	settextstyle(&font_style);
+	//设置颜色
+	settextcolor(RED);
+	//指定坐标显示
+	outtextxy(speed_x_axis, speed_y_aixs, speed_str);
+}
+
+void Frame::draw_level() {
+	//存储要显示的字符串
+	static TCHAR level_str[64];
+	//格式化字符串
+	_stprintf_s(level_str, _T("当前关卡：%d"), level);
+	//获取当前字体样式
+	LOGFONT font_style;
+	gettextstyle(&font_style);
+	//更改字体样式
+	font_style.lfHeight = 25;
+	font_style.lfWeight = 25;
+	//设置背景透明
+	setbkmode(TRANSPARENT);
+	//设置字体样式
+	settextstyle(&font_style);
+	//设置颜色
+	settextcolor(RED);
+	//指定坐标显示
+	outtextxy(level_x_axis, level_y_axis, level_str);
 }
 
 void Frame::draw_pause() {
@@ -853,7 +924,7 @@ void Frame::generate_end_game() {
 	}
 
 	//创建一个end_game对象
-	EndGame end_game(this->map_height, this->map_width, this->level, this->map, this->blockColors);
+	EndGame end_game(this->map_height - 4, this->map_width, this->level, this->map, this->blockColors);
 	std::string filename;
 	std::cout << "请输入残局文件名: ";
 	while (std::cin >> filename) {

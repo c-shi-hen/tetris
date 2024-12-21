@@ -5,7 +5,11 @@
 #include <easyx.h>
 
 EndGame::EndGame(int map_height, int map_width, int level, std::vector<std::vector<bool>> map, std::vector<std::vector<int>> blockColors) {
-
+    this->mapHeight = map_height;
+    this->mapWidth = map_width;
+    this->initialLevel = level;
+    this->map = map;
+    this->blockColors = blockColors;
 }
 
 EndGame::EndGame(Animation* animation) {
@@ -192,9 +196,9 @@ bool EndGame::saveToFile(const std::string& filename) const {
 
 bool EndGame::loadFromFile(const std::string& filename) {
 
-    std::ifstream file("endgames/" + filename + ".end");
+    std::ifstream file(filename);
     if (!file.is_open()) {
-        std::cerr << "无法打开文件：" << filename << std::endl;
+        std::cout << "无法打开文件：" << filename << std::endl;
         return false;
     }
 
