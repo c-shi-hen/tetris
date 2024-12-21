@@ -131,7 +131,6 @@ bool Begin_frame::getMainMenuMessage(MainMenuMessage& msg) {
     return false;
 }
 
-
 //检查文件是否存在
 bool Begin_frame::fileExists(const std::string& filename) {
     try {
@@ -156,7 +155,6 @@ bool Begin_frame::createDirectoryIfNotExists(const std::string& path) {
         return false;
     }
 }
-
 
 // 初始化默认配置
 void Begin_frame::initializeDefaults() {
@@ -224,7 +222,6 @@ bool Begin_frame::loadConfig(const std::string& filename) {
         return false;
     }
 }
-
 
 // 保存当前配置到指定文件
 bool Begin_frame::saveConfig(const std::string& filename) const {
@@ -364,7 +361,6 @@ bool Begin_frame::validateKeyValue(const std::string& key, const std::string& va
     }
     return false;
 }
-
 
 bool Begin_frame::testValidateKeyValue(const std::string& key, const std::string& value) const {
     return validateKeyValue(key, value);

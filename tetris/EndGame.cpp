@@ -169,7 +169,8 @@ bool EndGame::createEndGame() {
 }
 
 bool EndGame::saveToFile(const std::string& filename) const {
-    std::ofstream ofs(filename);
+
+    std::ofstream ofs("endgames/" + filename + ".end");
     if (!ofs.is_open()) {
         return false;
     }
@@ -190,7 +191,8 @@ bool EndGame::saveToFile(const std::string& filename) const {
 }
 
 bool EndGame::loadFromFile(const std::string& filename) {
-    std::ifstream file(filename);
+
+    std::ifstream file("endgames/" + filename + ".end");
     if (!file.is_open()) {
         std::cerr << "无法打开文件：" << filename << std::endl;
         return false;
