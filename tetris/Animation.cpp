@@ -6,65 +6,74 @@ Animation::Animation() {
 }
 
 Animation::~Animation(){
+	
+	//释放方块图片内存
+	for (int i = 0; i < block_png.size(); i++) {
+		delete block_png[i];
+	}
 
+	//释放方块组合图片内存
+	for (int i = 0; i < block_group_png.size(); i++) {
+		delete block_group_png[i];
+	}
 }
 
 void Animation::load_block_png() {
 	IMAGE* temp = new IMAGE();
-	loadimage(temp, _T("../res/blue.png"));
+	loadimage(temp, _T("./res/blue.png"));
 	block_png.push_back(temp);
 
 	temp = new IMAGE();
-	loadimage(temp, _T("../res/green.png"));
+	loadimage(temp, _T("./res/green.png"));
 	block_png.push_back(temp);
 
 	temp = new IMAGE();
-	loadimage(temp,  _T("../res/light_blue.png"));
+	loadimage(temp,  _T("./res/light_blue.png"));
 	block_png.push_back(temp);
 
 	temp = new IMAGE();
-	loadimage(temp, _T("../res/orange.png"));
+	loadimage(temp, _T("./res/orange.png"));
 	block_png.push_back(temp);
 
 	temp = new IMAGE();
-	loadimage(temp, _T("../res/purple.png"));
+	loadimage(temp, _T("./res/purple.png"));
 	block_png.push_back(temp);
 
 	temp = new IMAGE();
-	loadimage(temp, _T("../res/yellow.png"));
+	loadimage(temp, _T("./res/yellow.png"));
 	block_png.push_back(temp);
 }
 
 void Animation::load_block_group_png() {
 	//加载背景图片
-	loadimage(&back_ground, _T("../res/background.png"));
+	loadimage(&back_ground, _T("./res/background.png"));
 
 	//加载方块组合照片,顺序和方块组合的顺序一致
 	IMAGE* temp = new IMAGE();
-	loadimage(temp, _T("../res/S.png"));
+	loadimage(temp, _T("./res/S.png"));
 	block_group_png.push_back(temp);
 
 	temp = new IMAGE();
-	loadimage(temp, _T("../res/Z.png"));
+	loadimage(temp, _T("./res/Z.png"));
 	block_group_png.push_back(temp);
 
 	temp = new IMAGE();
-	loadimage(temp, _T("../res/L.png"));
+	loadimage(temp, _T("./res/L.png"));
 	block_group_png.push_back(temp);
 
 	temp = new IMAGE();
-	loadimage(temp, _T("../res/J.png"));
+	loadimage(temp, _T("./res/J.png"));
 	block_group_png.push_back(temp);
 
 	temp = new IMAGE();
-	loadimage(temp, _T("../res/I.png"));
+	loadimage(temp, _T("./res/I.png"));
 	block_group_png.push_back(temp);
 
 	temp = new IMAGE();
-	loadimage(temp, _T("../res/O.png"));
+	loadimage(temp, _T("./res/O.png"));
 	block_group_png.push_back(temp);
 
 	temp = new IMAGE();
-	loadimage(temp, _T("../res/T.png"));
+	loadimage(temp, _T("./res/T.png"));
 	block_group_png.push_back(temp);
 }

@@ -3,6 +3,12 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# 忽略配置文件
+*.config
+
+# 忽略残局文件
+*.end
+
 # User-specific files
 *.rsuser
 *.suo

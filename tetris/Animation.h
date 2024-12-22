@@ -16,6 +16,7 @@ public:
 	Animation();
 
 	~Animation();
+
 	/*
 	* @brief 加载方块图片
 	*/

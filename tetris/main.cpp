@@ -2,7 +2,7 @@
 #include"Frame.h"
 #include"Begin_frame.h"
 #include"Animation.h"
-#include "ConfigManager.h"
+#include "EndGame.h"
 #include <iostream>
 #include <windows.h> 
 #include <tchar.h>   
@@ -10,369 +10,284 @@
 
 namespace fs = std::filesystem;
 
+// 显示控制台
+void showConsole() {
+    AllocConsole();  // 分配控制台窗口
 
+    FILE* pFile;
+    freopen_s(&pFile, "CONOUT$", "w", stdout); // 重定向标准输出到控制台
 
-
-/*
-int main()
-{
-	Animation* animation = new Animation();
-
-	Begin_frame* my_begin_frame = new Begin_frame(animation);
-	SetWindowText(initgraph( my_begin_frame->begin_frame_width, my_begin_frame->begin_frame_height), L"俄罗斯方块");
-	my_begin_frame->initial();
-	closegraph();
-	
-	
-	Frame* myFrame = new Frame(my_begin_frame->map_width, my_begin_frame->map_height, animation);
-	SetWindowText(initgraph(myFrame->frame_width, myFrame->frame_height), L"俄罗斯方块");
-	BeginBatchDraw();
-	myFrame->game_begin();
-	EndBatchDraw();
-	closegraph();
-
-	delete(myFrame);
-	delete(animation);
-	delete(my_begin_frame);
-
-	return 0;
-}
-
-*/
-
-
-//#define VK_G 0x47
-//#define VK_Q 0x51
-//
-//
-//// 定义 MainExMessage 结构体（用于主菜单消息处理）
-//struct MainExMessage {
-//    int message;
-//    int vkcode;
-//};
-//
-//// 获取主菜单消息的函数
-//bool getMainMenuMessage(MainExMessage& msg) {
-//    MSG winMsg;
-//    if (PeekMessage(&winMsg, NULL, 0, 0, PM_REMOVE)) {
-//        msg.message = winMsg.message;
-//        msg.vkcode = winMsg.wParam;
-//        TranslateMessage(&winMsg);
-//        DispatchMessage(&winMsg);
-//        return true;
-//    }
-//    return false;
-//}
-//
-//
-//// 封装原有游戏代码到 runGame() 函数
-//void runGame()
-//{
-//    Animation* animation = new Animation();
-//
-//    Begin_frame* my_begin_frame = new Begin_frame(animation);
-//    SetWindowText(initgraph(my_begin_frame->begin_frame_width, my_begin_frame->begin_frame_height), L"俄罗斯方块");
-//    my_begin_frame->initial();
-//    closegraph();
-//
-//
-//    Frame* myFrame = new Frame(my_begin_frame->map_width, my_begin_frame->map_height, animation);
-//    SetWindowText(initgraph(myFrame->frame_width, myFrame->frame_height), L"俄罗斯方块");
-//    BeginBatchDraw();
-//    myFrame->game_begin();
-//    EndBatchDraw();
-//    closegraph();
-//
-//    delete(myFrame);
-//    delete(animation);
-//    delete(my_begin_frame);
-//
-//    
-//}
-//
-//
-//int main()
-//{
-//    // 确保 config 目录存在
-//    if (!createDirectoryIfNotExists("config")) {
-//        std::cerr << "无法创建 'config' 目录。" << std::endl;
-//        return 1;
-//    }
-//
-//    // 加载最后使用的配置
-//    Config currentConfig;
-//    loadLastConfig(currentConfig);
-//
-//    // 显示主菜单并获取玩家选择
-//    while (true) {
-//        // 初始化主界面窗口
-//        int menuWidth = 600;  // 根据需要调整
-//        int menuHeight = 400; // 根据需要调整
-//        HWND menuHwnd = initgraph(menuWidth, menuHeight, 1); // 使用 1 代替 SHOWCONSOLE
-//        if (menuHwnd == INVALID_HANDLE_VALUE) {
-//            std::cerr << "主界面窗口初始化失败！" << std::endl;
-//            return 1;
-//        }
-//
-//        // 设置窗口标题
-//        SetWindowText(menuHwnd, L"俄罗斯方块 - 主菜单");
-//
-//        // 清除屏幕并绘制主界面内容
-//        cleardevice();
-//        settextstyle(48, 0, _T("Arial"));
-//        settextcolor(YELLOW);
-//
-//        TCHAR title[] = _T("欢迎来到俄罗斯方块");
-//        TCHAR prompt1[] = _T("按 'G' 开始游戏");
-//        TCHAR prompt2[] = _T("按 'Q' 退出游戏");
-//        TCHAR prompt3[] = _T("按 'I' 新建配置");
-//        TCHAR prompt4[] = _T("按 'U' 加载配置");
-//
-//        // 计算文本位置以居中显示
-//        int titleWidth = textwidth(title);
-//        int prompt1Width = textwidth(prompt1);
-//        int prompt2Width = textwidth(prompt2);
-//        int prompt3Width = textwidth(prompt3);
-//        int prompt4Width = textwidth(prompt4);
-//
-//        outtextxy((getwidth() - titleWidth) / 2, getheight() / 2 - 120, title);
-//        settextstyle(24, 0, _T("Arial")); // 设置较小字体
-//        settextcolor(YELLOW);
-//        outtextxy((getwidth() - prompt1Width) / 2, getheight() / 2 - 20, prompt1);
-//        outtextxy((getwidth() - prompt2Width) / 2, getheight() / 2 + 20, prompt2);
-//        outtextxy((getwidth() - prompt3Width) / 2, getheight() / 2 + 60, prompt3);
-//        outtextxy((getwidth() - prompt4Width) / 2, getheight() / 2 + 100, prompt4);
-//
-//        FlushBatchDraw(); // 显示绘制内容
-//
-//        // 进入消息循环，等待用户输入
-//        MainExMessage msg;
-//        bool invalidInput = false;
-//
-//        while (true) {
-//            // 获取消息
-//            if (getMainMenuMessage(msg)) {
-//                if (msg.message == WM_KEYDOWN) {
-//                    switch (msg.vkcode) {
-//                    case 'G':
-//                    case 'g':
-//                        closegraph(); // 关闭主菜单窗口
-//                        runGame();     // 运行游戏
-//                        return 0;      // 游戏结束后退出程序
-//                    case 'Q':
-//                    case 'q':
-//                        closegraph(); // 关闭主菜单窗口
-//                        std::cout << "退出游戏。" << std::endl;
-//                        return 0;      // 退出程序
-//                    case 'I':
-//                    case 'i':
-//                        closegraph(); // 关闭主菜单窗口
-//                        createConfig(); // 新建配置
-//                        // 重新绘制主菜单后继续循环
-//                        break;
-//                    case 'U':
-//                    case 'u':
-//                        closegraph(); // 关闭主菜单窗口
-//                        loadConfig(currentConfig); // 加载配置
-//                        // 重新绘制主菜单后继续循环
-//                        break;
-//                    default:
-//                        invalidInput = true;
-//                        break;
-//                    }
-//                    // 重新初始化主菜单窗口
-//                    menuHwnd = initgraph(menuWidth, menuHeight, 1);
-//                    if (menuHwnd == INVALID_HANDLE_VALUE) {
-//                        std::cerr << "主界面窗口初始化失败！" << std::endl;
-//                        return 1;
-//                    }
-//                    SetWindowText(menuHwnd, L"俄罗斯方块 - 主菜单");
-//                    cleardevice();
-//                    settextstyle(48, 0, _T("Arial"));
-//                    settextcolor(YELLOW);
-//                    outtextxy((getwidth() - titleWidth) / 2, getheight() / 2 - 120, title);
-//                    settextstyle(24, 0, _T("Arial"));
-//                    settextcolor(YELLOW);
-//                    outtextxy((getwidth() - prompt1Width) / 2, getheight() / 2 - 20, prompt1);
-//                    outtextxy((getwidth() - prompt2Width) / 2, getheight() / 2 + 20, prompt2);
-//                    outtextxy((getwidth() - prompt3Width) / 2, getheight() / 2 + 60, prompt3);
-//                    outtextxy((getwidth() - prompt4Width) / 2, getheight() / 2 + 100, prompt4);
-//                    FlushBatchDraw();
-//                }
-//            }
-//
-//            if (invalidInput) {
-//                // 显示非法输入提示
-//                cleardevice();
-//                settextstyle(24, 0, _T("Arial"));
-//                settextcolor(RED);
-//                TCHAR invalidMsg[] = _T("无效输入，请按 'G' 开始、'I' 新建、'U' 加载配置或 'Q' 退出");
-//                int invalidWidth = textwidth(invalidMsg);
-//                outtextxy((getwidth() - invalidWidth) / 2, getheight() / 2 - 20, invalidMsg);
-//                FlushBatchDraw();
-//                Sleep(2000); // 显示2秒提示
-//
-//                // 重新绘制主菜单
-//                cleardevice();
-//                settextstyle(48, 0, _T("Arial"));
-//                settextcolor(YELLOW);
-//                outtextxy((getwidth() - titleWidth) / 2, getheight() / 2 - 120, title);
-//                settextstyle(24, 0, _T("Arial"));
-//                settextcolor(YELLOW);
-//                outtextxy((getwidth() - prompt1Width) / 2, getheight() / 2 - 20, prompt1);
-//                outtextxy((getwidth() - prompt2Width) / 2, getheight() / 2 + 20, prompt2);
-//                outtextxy((getwidth() - prompt3Width) / 2, getheight() / 2 + 60, prompt3);
-//                outtextxy((getwidth() - prompt4Width) / 2, getheight() / 2 + 100, prompt4);
-//                FlushBatchDraw();
-//
-//                invalidInput = false;
-//            }
-//
-//            Sleep(10); // 减少CPU占用
-//        }
-//    }
-//}
-
-
-
-
-
-#define VK_G 0x47
-#define VK_Q 0x51
-#define VK_I 0x49
-#define VK_U 0x55
-
-// 主菜单消息结构体
-struct MainMenuMessage {
-    bool startGame = false;
-    bool quitGame = false;
-    bool createConfig = false;
-    bool loadConfig = false;
-};
-
-// 获取主菜单消息
-bool getMainMenuMessage(MainMenuMessage& msg) {
-    ExMessage message;
-    if (peekmessage(&message)) {
-        switch (message.vkcode) {
-        case VK_G:
-            msg.startGame = true;
-            return true;
-        case VK_Q:
-            msg.quitGame = true;
-            return true;
-        case VK_I:
-            msg.createConfig = true;
-            return true;
-        case VK_U:
-            msg.loadConfig = true;
-            return true;
-        default:
-            break;
-        }
+    // 获取控制台窗口句柄
+    HWND consoleWnd = GetConsoleWindow();
+    if (consoleWnd == nullptr) {
+        return; // 如果控制台窗口句柄为空，则返回
     }
-    return false;
+
+    // 显示控制台窗口
+    ShowWindow(consoleWnd, SW_SHOWNORMAL);
+
+    // 获取屏幕分辨率
+    RECT desktopRect;
+    GetWindowRect(GetDesktopWindow(), &desktopRect);
+    int screenWidth = desktopRect.right;
+    int screenHeight = desktopRect.bottom;
+
+    // 设置控制台窗口的位置和大小
+    int consoleWidth = screenWidth / 3;  // 设置控制台宽度
+    int consoleHeight = screenHeight / 2; // 设置控制台高度为屏幕高度的一半
+    int consoleX = screenWidth - consoleWidth - 10; // 控制台位于屏幕右侧，距离右边框50像素
+    int consoleY = (screenHeight - consoleHeight) / 2; // 控制台垂直居中
+
+    // 调整控制台窗口的位置和大小
+    SetWindowPos(consoleWnd, HWND_TOP, consoleX, consoleY, consoleWidth, consoleHeight, SWP_NOZORDER);
+
+    // 将控制台窗口置于最前端
+    SetForegroundWindow(consoleWnd);
 }
 
-// 绘制主菜单界面
-void drawMainMenu() {
-    cleardevice();
-    settextstyle(48, 0, _T("Arial"));
-    settextcolor(YELLOW);
+// 隐藏控制台
+void hideConsole() {
 
-    TCHAR title[] = _T("欢迎来到俄罗斯方块");
-    TCHAR prompt1[] = _T("按 'G' 开始游戏");
-    TCHAR prompt2[] = _T("按 'Q' 退出游戏");
-    TCHAR prompt3[] = _T("按 'I' 新建配置");
-    TCHAR prompt4[] = _T("按 'U' 加载配置");
-
-    int titleWidth = textwidth(title);
-    int prompt1Width = textwidth(prompt1);
-    int prompt2Width = textwidth(prompt2);
-    int prompt3Width = textwidth(prompt3);
-    int prompt4Width = textwidth(prompt4);
-
-    outtextxy((getwidth() - titleWidth) / 2, getheight() / 2 - 120, title);
-    settextstyle(24, 0, _T("Arial"));
-    outtextxy((getwidth() - prompt1Width) / 2, getheight() / 2 - 20, prompt1);
-    outtextxy((getwidth() - prompt2Width) / 2, getheight() / 2 + 20, prompt2);
-    outtextxy((getwidth() - prompt3Width) / 2, getheight() / 2 + 60, prompt3);
-    outtextxy((getwidth() - prompt4Width) / 2, getheight() / 2 + 100, prompt4);
-
-    FlushBatchDraw();
+    // 隐藏控制台
+    ShowWindow(GetConsoleWindow(), SW_HIDE);
 }
 
 // 运行游戏
-void runGame() {
-    Animation* animation = new Animation();
-    
-    Begin_frame* my_begin_frame = new Begin_frame(animation);
-    SetWindowText(initgraph(my_begin_frame->begin_frame_width, my_begin_frame->begin_frame_height), L"俄罗斯方块");
-    my_begin_frame->initial();
-    closegraph();
-    
-    
-    Frame* myFrame = new Frame(my_begin_frame->map_width, my_begin_frame->map_height, animation);
-    SetWindowText(initgraph(myFrame->frame_width, myFrame->frame_height), L"俄罗斯方块");
+void runGame(Begin_frame* begin_frame) {
+
+    Frame* myFrame = new Frame(begin_frame->animation, begin_frame);
+
+    HWND hwnd = initgraph(myFrame->frame_width, myFrame->frame_height);
+    SetWindowText(hwnd, L"俄罗斯方块");
+
+    RECT desktopRect;
+    GetWindowRect(GetDesktopWindow(), &desktopRect);
+    int screenWidth = desktopRect.right;
+    int screenHeight = desktopRect.bottom;
+    int windowX = (screenWidth - myFrame->frame_width) / 2;
+    int windowY = (screenHeight - myFrame->frame_height) / 2;
+    SetWindowPos(hwnd, HWND_TOP, windowX, windowY, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+
     BeginBatchDraw();
     myFrame->game_begin();
     EndBatchDraw();
     closegraph();
-    
+
     delete(myFrame);
-    delete(animation);
-    delete(my_begin_frame);
-    
 }
 
 int main() {
-    //// 确保 config 目录存在
-    //if (!createDirectoryIfNotExists("config")) {
-    //    std::cerr << "无法创建 'config' 目录。" << std::endl;
-    //    return 1;
-    //}
-
-    // 加载最后使用的配置
-    Config currentConfig;
-    loadLastConfig(currentConfig);
-
-    // 初始化主菜单界面
-    int menuWidth = 600;
-    int menuHeight = 400;
-    initgraph(menuWidth, menuHeight);
-    SetWindowText(GetHWnd(), L"俄罗斯方块 - 主菜单");
-
-    // 主菜单消息循环
-    MainMenuMessage menuMsg;
-    while (true) {
-        drawMainMenu();
-
-        // 等待用户输入
-        while (!getMainMenuMessage(menuMsg)) {
-            Sleep(10);
-        }
-
-        if (menuMsg.startGame) {
-            closegraph();
-            runGame();
-            break;
-        }
-        if (menuMsg.quitGame) {
-            closegraph();
-            std::cout << "退出游戏。" << std::endl;
-            break;
-        }
-        if (menuMsg.createConfig) {
-            createConfig();
-        }
-        if (menuMsg.loadConfig) {
-            loadConfig(currentConfig);
-        }
-
-        // 重置消息
-        menuMsg = {};
+    // 确保 config 和 endgames 目录存在
+    const std::string configDir = "config";
+    const std::string endgameDir = "endgames";
+    if (!fs::exists(configDir) && !fs::create_directories(configDir)) {
+        std::cout << "无法创建 'config' 目录。" << std::endl;
+        return 1;
+    }
+    if (!fs::exists(endgameDir) && !fs::create_directories(endgameDir)) {
+        std::cout << "无法创建 'endgames' 目录。" << std::endl;
+        return 1;
     }
 
+    //初始化资源类
+    Animation* animation = new Animation();
+
+    Begin_frame* begin_frame = new Begin_frame(animation);
+
+    // 初始化主菜单界面
+    begin_frame->initial();
+
+
+    //开始读取消息
+    while (true) {
+
+        // 获取用户输入
+        begin_frame->getMainMenuMessage(begin_frame->menuMsg);
+
+        // 开始游戏
+        if (begin_frame->menuMsg.startGame) {
+            EndBatchDraw();
+            closegraph();
+
+            // 启动游戏
+            runGame(begin_frame);
+
+            // 初始化主菜单
+            begin_frame->initial();
+            begin_frame->menuMsg.startGame = false;
+            continue;
+        }
+
+        //退出游戏
+        if (begin_frame->menuMsg.quitGame) {
+            EndBatchDraw();
+            closegraph();
+            std::cout << "退出游戏。" << std::endl;
+            begin_frame->menuMsg.quitGame = false;
+            break;
+        }
+
+        // 新建配置文件
+        if (begin_frame->menuMsg.createConfig) {
+            showConsole();
+            EndBatchDraw();
+            closegraph();
+
+            std::string filename;
+            std::cout << "请输入新配置文件名称（仅限字母、数字和下划线，输入 'q' 退出）：";
+            while (std::cin >> filename) {
+                if (filename == "q") {
+                    std::cout << "取消新建配置。\n";
+                    break;
+                }
+                else {
+                    if (begin_frame->createConfig(filename)) {
+                        std::cout << "新配置创建成功。" << std::endl;
+                    }
+                    else {
+                        std::cout << "新配置创建失败，请再试一次。" << std::endl;
+                    }
+                }
+                std::cout << "请输入新配置文件名称（仅限字母、数字和下划线，输入 'q' 退出）：";
+            }
+
+            // 返回主菜单界面
+            hideConsole();
+            begin_frame->menuMsg.createConfig = false;
+            begin_frame->initial();
+            flushmessage();
+            continue;
+        }
+
+        // 加载配置文件
+        if (begin_frame->menuMsg.loadConfig) {
+            showConsole();
+            EndBatchDraw();
+            closegraph();
+
+            std::string filename;
+            std::cout << "请输入要加载的配置文件名（不包括路径,后缀，直接输入文件名，输入 'q' 退出）：";
+            bool is_load = false;
+            while (std::cin >> filename) {
+                if (filename == "q") {
+                    std::cout << "取消加载配置。" << std::endl;
+                    break;
+                }
+                else {
+                    std::string filepath = "config/" + filename + ".config";
+                    if (begin_frame->loadConfig(filepath)) {
+                        std::cout << "配置文件加载成功：" << filepath << std::endl;
+                        is_load = true;
+
+                        // 保存当前配置到 last.config
+                        if (begin_frame->saveLastConfig()) {
+                            std::cout << "当前配置已同时复制到到 last.config。" << std::endl;
+                        }
+                        else {
+                            std::cout << "复制到 last.config 失败！" << std::endl;
+                        }
+                        break;
+                    }
+                    else {
+                        std::cout << "配置文件加载失败。" << std::endl;
+                    }
+                }
+                std::cout << "请输入要加载的配置文件名（不包括路径,后缀，直接输入文件名，输入 'q' 退出）：";
+            }
+
+            // 如果加载成功，启动游戏
+            hideConsole();
+            if (is_load) runGame(begin_frame);
+
+            // 返回主菜单界面
+            begin_frame->menuMsg.loadConfig = false;
+            begin_frame->initial();
+            flushmessage();
+            continue;
+        }
+
+        // 创建残局
+        if (begin_frame->menuMsg.createEndGame) {
+            showConsole();
+            EndBatchDraw();
+            closegraph();
+            
+            std::string filename;
+            std::cout << "请输入残局文件名称（仅限英文字母、数字和下划线，输入 'q' 取消）：";
+            while (std::cin >> filename) {
+                if (filename == "q") {
+                    std::cout << "取消创建残局。" << std::endl;
+                    break;
+                }
+                else {
+                    EndGame endGame(animation); // 传递 Animation 对象
+                    if (endGame.createEndGame(filename)) {
+                        std::cout << "残局创建完成。" << std::endl;
+                    }
+                    else {
+                        std::cout << "残局创建失败，请再试一次。" << std::endl;
+                    }
+                }
+                std::cout << "请输入要加载的配置文件名（不包括路径,后缀，直接输入文件名，输入 'q' 退出）：";
+            }
+            
+
+            // 返回主菜单界面
+            hideConsole();
+            begin_frame->menuMsg.createEndGame = false;
+            begin_frame->initial();
+            flushmessage();
+            continue;
+        }
+
+        // 加载残局并挑战
+        if (begin_frame->menuMsg.challengeEndGame) {
+            showConsole();
+            EndBatchDraw();
+            closegraph();
+
+            std::string endGameFile;
+            std::cout << "请输入要加载的残局文件名（不包括路径,后缀，直接输入文件名，输入 'q' 退出）：";
+            bool is_load = false;
+            while (std::cin >> endGameFile) {
+                if (endGameFile == "q") {
+                    std::cout << "取消加载残局。" << std::endl;
+                    break;
+                }
+
+                std::string filepath = endgameDir + "/" + endGameFile + ".end";
+                EndGame endGame(animation);
+                if (endGame.loadFromFile(filepath)) {
+                    std::cout << "残局加载成功：" << filepath << std::endl;
+                    is_load = true;
+                    //将相关参数传递给主菜单
+                    begin_frame->map = endGame.map;
+                    begin_frame->blockColors = endGame.blockColors;
+                    begin_frame->map_height = endGame.mapHeight;
+                    begin_frame->map_width = endGame.mapWidth;
+                    begin_frame->initialLevel = endGame.initialLevel;
+
+                    break; // 退出主菜单循环
+                }
+                else {
+                    std::cout << "残局加载失败，文件可能不存在或格式错误。" << std::endl;
+                }
+                std::cout << "请输入要加载的残局文件名（不包括路径,后缀，直接输入文件名，输入 'q' 退出）：";
+            }
+            //加载成功，启动游戏
+            hideConsole();
+            if (is_load) runGame(begin_frame);
+            begin_frame->menuMsg.challengeEndGame = false;
+            begin_frame->initial();
+            flushmessage();
+            continue;
+        }
+        FlushBatchDraw();
+
+        Sleep(20);
+    }
+
+    delete begin_frame;
+    delete animation;
     return 0;
 }
-

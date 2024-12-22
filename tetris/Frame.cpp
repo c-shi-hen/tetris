@@ -1,10 +1,14 @@
 #include"Frame.h"
 #include<random>
 #include<iostream>
+#include"EndGame.h"
+
 
 Frame::Frame(Animation* animation, Begin_frame* begin_frame) {
+
 	//获得主菜单指针
 	this->begin_frame = begin_frame;
+
 	//获得地图参数
 	this->map_height = begin_frame->map_height + 4;//前四行留给生成方块使用
 	this->map_width = begin_frame->map_width;
@@ -19,51 +23,112 @@ Frame::Frame(Animation* animation, Begin_frame* begin_frame) {
 	this->block_group_png = &animation->block_group_png;
 
 	//初始化消息
-	message = {};
-	is_up = false;
-	is_down = false;
-	is_left = false;
-	is_right = false;
-	is_space = false;
-	is_pause = false;
-	is_generate_end_game = false;
+	this->message = {};
+	this->is_up = false;
+	this->is_down = false;
+	this->is_left = false;
+	this->is_right = false;
+	this->is_space = false;
+	this->is_pause = false;
+	this->is_generate_end_game = false;
+	this->is_over = false;
 
 	//初始化得分
-	score = 0;
+	this->score = 0;
 
 	//初始化得分坐标
-	score_x_axis = this->map_width * Block::block_width + menu_width / 5;
-	score_y_axis = 20;
+	this->score_x_axis = this->map_width * Block::block_width + menu_width / 5;
+	this->score_y_axis = 20;
+
+	//初始化速度坐标
+	this->speed_x_axis = this->map_width * Block::block_width + menu_width / 5;
+	this->speed_y_aixs = 60;
+	
+	//初始化关卡坐标
+	this->level_x_axis = this->map_width * Block::block_width + menu_width / 5;
+	this->level_y_axis = 100;
 
 	//初始化暂停坐标
-	pause_x_axis = this->frame_width / 2 - 200;
-	pause_y_axis = this->frame_height / 2 - 100;
+	this->pause_x_axis = this->frame_width / 2 - 200;
+	this->pause_y_axis = this->frame_height / 2 - 100;
 
 	//初始化速度
-	SPEED = 10;
+	this->SPEED = begin_frame->gameSpeed;
 
 	//初始化种子
-	seed = 1;
+	this->seed = begin_frame->randomSeed;
+
+	//初始化关卡
+	this->level = begin_frame->initialLevel;
+
+	//初始化方块组合图片的坐标
+	this->next_group_block_x_axis = this->map_width * Block::block_width + menu_width / 6;
+	this->next_group_block_y_axis = 200;
+
+	//初始化进行
+	this->running = false;
+
+	//获取残局信息
+	this->map = begin_frame->map;
+	this->blockColors = begin_frame->blockColors;
 
 	//生成方块
 	initial_block();
-
-	//初始化方块组合图片的坐标
-	next_group_block_x_axis = this->map_width * Block::block_width + menu_width / 4;
-	next_group_block_y_axis = 100;
-
-	//初始化进行
-	running = false;
-
 }
 
 Frame::~Frame() {
+	//释放方块对象
+	for (int i = 0; i < map_height; i++) {
+		for (int j = 0; j < map_width; j++) {
+			delete block[i][j];
+		}
+	}
+	//释放当前正在下落的方块
+	delete_block_group();
+
+	//释放下一个方块组合
+	for(int i = 0; i < next_block_group.size(); i++){
+		for (int j = 0; j < next_block_group[i].size(); j++) {
+			delete next_block_group[i][j];
+		}
+	}
 
 }
 
+//初始化部分
+void Frame::initial_block() {
+
+	for (int i = 0; i < 4; i++) {
+		std::vector<Block*> block_line;
+		for (int j = 0; j < map_width; j++) {
+			Block* temp = new Block(i, j, &this->animation->block_png);
+			block_line.push_back(temp);
+		}
+		block.push_back(block_line);
+	}
+
+	for (int i = 4; i < map_height; i++) {
+		std::vector<Block*> block_line;
+		for (int j = 0; j < map_width; j++) {
+			Block* temp = new Block(i, j, &this->animation->block_png);
+			temp->is_block = this->map[i - 4][j];
+			temp->color = this->blockColors[i - 4][j];
+			block_line.push_back(temp);
+		}
+		block.push_back(block_line);
+	}
+}
+
+
+//游戏开始与结束
 void Frame::game_begin() {
 
-	std::srand(this->seed);
+	//初始化种子
+	//创建随机数生成引擎
+	if (seed != -1){
+		std::srand(this->seed);
+	}
+	
 	//生成第一个方块组合
 	generate_block_group();
 
@@ -78,6 +143,12 @@ void Frame::game_begin() {
 
 	//绘制得分
 	draw_score();
+
+	//绘制速度
+	draw_speed();
+
+	//绘制关卡
+	draw_level();
 
 	//生成第二个方块组合
 	generate_block_group();
@@ -102,24 +173,184 @@ void Frame::game_begin() {
 void Frame::game_over() {
 	running = false;
 	renew_frame();
-	
-	exit(1);
 }
 
+//获取消息部分
+void Frame::get_message(ExMessage& message) {
+
+	int timer = 0;
+	int temp_speed = SPEED + level;
+	while (running) {
+		timer++;
+		//动态延时优化性能，保证每次循环执行的时间高于帧率
+		//开始时间
+		ULONGLONG begin_time = GetTickCount64();
+		
+		while (peekmessage(&message)) {
+			
+			if (message.message == WM_KEYDOWN) {
+				//每个按键单独处理
+				switch (message.vkcode) {
+				case VK_W: {
+					is_up = true;
+					break;
+				}
+				case VK_S: {
+					is_down = true;
+					break;
+				}
+				case VK_A: {
+					if (!is_right) {
+						is_left = true;
+					}
+					break;
+				}
+				case VK_D: {
+					if (!is_left) {
+						is_right = true;
+					}
+					break;
+				}
+				case VK_SPACE: {
+					is_space = true;
+					break;
+				}
+				case VK_ESCAPE: {
+					if (is_pause) {
+						is_pause = false;
+					}
+					else {
+						is_pause = true;
+					}
+					break;
+				}
+				case VK_G: {
+					is_generate_end_game = true;
+					break;
+				}
+				case VK_P: {
+					if (is_pause) {
+						is_over = true;
+					}
+					break;
+				}
+				default:
+					break;
+				}
+			}
+			else if (message.message == WM_KEYUP) {
+				switch (message.vkcode) {
+				case VK_W: {
+					is_up = false;
+					break;
+				}
+				case VK_S: {
+					is_down = false;
+					//松下按键后刷新速度
+
+					temp_speed = SPEED + level;
+
+					break;
+				}
+				case VK_A: {
+					is_left = false;
+					break;
+				}
+				case VK_D: {
+					is_right = false;
+					break;
+				}
+				case VK_SPACE: {
+					is_space = false;
+					break;
+				}
+				case VK_G: {
+					is_generate_end_game = false;
+					break;
+				}
+				default:
+					break;
+				}
+			}
+		}
+
+		if (!is_pause) {
+			if (is_left) {
+				moveLeft();
+				is_left = false;
+				renew_frame();
+			}
+			if (is_right) {
+				moveRight();
+				is_right = false;
+				renew_frame();
+			}
+			if (is_up) {
+				rotate();
+				is_up = false;
+				renew_frame();
+			}
+
+			if (is_down && temp_speed <= 50) temp_speed++;
+
+			if (is_space) {
+				moveToLowestPosition();
+				is_space = false;
+				renew_frame();
+			}
+
+			//每隔 1000/speed ms下落一行
+			int timer_gap = (int)1000.0 / temp_speed / 16.7;
+			if (timer % timer_gap == 0) {
+				moveDown();
+				renew_frame();
+				timer %= timer_gap;
+			}
+		}
+		else {
+			//在暂停的情况下，生成残局
+			if (is_generate_end_game) {
+				generate_end_game();
+			}
+			renew_frame();
+
+			if (is_over) {
+				game_over();
+			}
+		}
+
+		//结束时间
+		ULONGLONG end_time = GetTickCount64();
+		//如果执行时间低于帧间隔，阻塞所缺时间，帧率设置为60
+		int run_time = end_time - begin_time;
+		if (run_time < 1000 / 60) {
+			Sleep(1000 / 60 - run_time);
+		}
+	}
+
+}
+
+
+//方块组合生成、下落、检查消除、检查结束
 void Frame::generate_block_group() {
 
 	//刷新block_group
 	rewnew_block_group();
 
-	//// 创建随机数生成引擎
-	//std::random_device rd;  // 用于获取随机数种子
-	//std::mt19937 gen(rd()); // Mersenne Twister 19937 演算法生成器
-	//// 设置随机数分布范围
-	//int start = 0;
-	//int end = 6;
-	//std::uniform_int_distribution<> dis(start, end); // 均匀分布
 	// 生成随机数
-	int block_group_shape = (int)((double)std::rand()/RAND_MAX * 7);
+	int block_group_shape;
+	if (seed != -1) {
+		block_group_shape = (int)((double)std::rand() / RAND_MAX * 7);
+	}
+	else {
+		std::random_device rd;  // 用于获取随机数种子
+		std::mt19937 gen(rd()); // Mersenne Twister 19937 演算法生成器
+		// 设置随机数分布范围
+		int start = 0;
+		int end = 6;
+		std::uniform_int_distribution<> dis(start, end); // 均匀分布
+		block_group_shape = dis(gen);
+	}
 
 	//测试用
 	//int block_group_shape = 4;
@@ -216,148 +447,10 @@ void Frame::generate_block_group() {
 	}
 	default:
 		//程序出错，直接退出
+		std::cout << "未能生成新方块，随机数种子出错" << std::endl;
 		exit(0);
 		break;
 	}
-}
-
-void Frame::get_message(ExMessage& message) {
-
-	int timer = 0;
-
-	while (running) {
-
-		timer++;
-		//动态延时优化性能，保证每次循环执行的时间高于帧率
-		//开始时间
-		ULONGLONG begin_time = GetTickCount64();
-		while (peekmessage(&message)) {
-			std::cout << "get keydown" << toascii(message.vkcode) << std::endl;
-			if (message.message == WM_KEYDOWN) {
-				//每个按键单独处理
-				switch (message.vkcode) {
-				case VK_W: {
-					is_up = true;
-					break;
-				}
-				case VK_S: {
-					is_down = true;
-					break;
-				}
-				case VK_A: {
-					if (!is_right) {
-						is_left = true;
-					}
-					break;
-				}
-				case VK_D: {
-					if (!is_left) {
-						is_right = true;
-					}
-					break;
-				}
-				case VK_SPACE: {
-					is_space = true;
-					break;
-				}
-				case VK_ESCAPE: {
-					if (is_pause) {
-						is_pause = false;
-					}
-					else {
-						is_pause = true;
-					}
-					break;
-				}
-				case VK_G: {
-					is_generate_end_game = true;
-					break;
-				}
-				default:
-					break;
-				}
-			}
-			else if (message.message == WM_KEYUP) {
-				switch (message.vkcode) {
-				case VK_W: {
-					is_up = false;
-					break;
-				}
-				case VK_S: {
-					is_down = false;
-					//松下按键后刷新速度
-					SPEED = 6;
-					break;
-				}
-				case VK_A: {
-					is_left = false;
-					break;
-				}
-				case VK_D: {
-					is_right = false;
-					break;
-				}
-				case VK_SPACE: {
-					is_space = false;
-					break;
-				}
-				case VK_G: {
-					is_generate_end_game = false;
-					break;
-				}
-				default:
-					break;
-				}
-			}
-		}
-
-		if (!is_pause) {
-			if (is_left) {
-				moveLeft();
-				is_left = false;
-				renew_frame();
-			}
-			if (is_right) {
-				moveRight();
-				is_right = false;
-				renew_frame();
-			}
-			if (is_up) {
-				rotate();
-				is_up = false;
-				renew_frame();
-			}
-			if (is_down && SPEED <= 50) SPEED++;
-			if (is_space) {
-				moveToLowestPosition();
-				is_space = false;
-				renew_frame();
-			}
-
-			//每隔 1000/speed ms下落一行
-			int timer_gap = (int)1000.0 / SPEED / 16.7;
-			if (timer % timer_gap == 0) {
-				moveDown();
-				renew_frame();
-				timer %= timer_gap;
-			}
-		}else {
-			//在暂停的情况下，生成残局
-			if (is_generate_end_game) {
-				generate_end_game();
-			}
-			renew_frame();
-		}
-		
-		//结束时间
-		ULONGLONG end_time = GetTickCount64();
-		//如果执行时间低于帧间隔，阻塞所缺时间，帧率设置为60
-		int run_time = end_time - begin_time;
-		if (run_time < 1000 / 60) {
-			Sleep(1000 / 60 - run_time);
-		}
-	}
-
 }
 
 void Frame::check_line() {
@@ -387,6 +480,11 @@ void Frame::check_line() {
 			}
 		}
 	}
+
+	//判断当前得分，提升关卡难度。每次获得十分，就增加一次关卡难度
+	if (score > (10 * level)) {
+		level++;
+	}
 }
 
 void Frame::erase_line(int row) {
@@ -403,149 +501,6 @@ void Frame::erase_line(int row) {
 	for (int i = 0; i < map_width; i++) {
 		block[0][i]->is_block = false;
 	}
-}
-
-void inline Frame::draw_backgroud() {
-	putimage(0, 0, this->background);
-}
-
-void inline Frame::initial_block() {
-	for (int i = 0; i < map_height; i++) {
-		std::vector<Block*> block_line;
-		for (int j = 0; j < map_width; j++) {
-			Block* temp = new Block(i, j, &this->animation->block_png);
-			temp->is_block = false;
-			block_line.push_back(temp);
-		}
-		block.push_back(block_line);
-	}
-}
-
-void Frame::renew_frame() {
-	//清除界面
-	cleardevice();
-
-	//绘制背景
-	draw_backgroud();
-
-	//绘制方块
-	draw_block();
-
-	//绘制得分
-	draw_score();
-
-	//绘制下一个方块组合的图片
-	draw_block_group_png();
-
-	//绘制一条分界线
-	setlinecolor(RED);
-	line(map_width * Block::block_width, 0, map_width * Block::block_width, map_height * Block::block_height);
-
-	//绘制截止线
-	line(0, 4 * Block::block_height, map_width * Block::block_width, 4 * Block::block_height);
-	setlinecolor(BLACK);
-
-	//游戏是否结束
-	if (!running) {
-		draw_game_over();
-	}
-
-	//游戏是否暂停
-	if (is_pause) {
-		draw_pause();
-	} 
-
-	//显示
-	FlushBatchDraw();
-}
-
-void Frame::draw_block() {
-	//绘制棋盘本身
-	std::cout << "------------------------" << std::endl;
-	std::cout << "block" << std::endl;
-	for (int i = 0; i < map_height; i++) {
-		for (int j = 0; j < map_width; j++) {
-			block[i][j]->show();
-		}
-	}
-	std::cout << "------------------------" << std::endl;
-	//绘制当前下落组合
-	std::cout << "------------------------" << std::endl;
-	std::cout << "block_group" << std::endl;
-	std::cout << "------------------------" << std::endl;
-	for (auto& x : block_group) {
-		for (auto& y : x) {
-			y->show();
-		}
-	}
-	std::cout << "------------------------" << std::endl;
-}
-
-void Frame::draw_score() {
-	//存储要显示的字符串
-	static TCHAR score_str[64];
-	//格式化字符串
-	_stprintf_s(score_str, _T("当前得分为：%d"), score);
-	//获取当前字体样式
-	LOGFONT font_style;
-	gettextstyle(&font_style);
-	//更改字体样式
-	font_style.lfHeight = 30;
-	font_style.lfWeight = 30;
-	//设置背景透明
-	setbkmode(TRANSPARENT);
-	//设置字体样式
-	settextstyle(&font_style);
-	//设置颜色
-	settextcolor(RED);
-	//指定坐标显示
-	outtextxy(score_x_axis, score_y_axis, score_str);
-}
-
-void Frame::draw_pause() {
-	//存储要显示的字符串
-	static TCHAR pause_str[64];
-	//格式化字符串
-	_stprintf_s(pause_str, _T("游戏暂停"));
-	//获取当前字体样式
-	LOGFONT font_style;
-	gettextstyle(&font_style);
-	//更改字体样式
-	font_style.lfHeight = 100;
-	font_style.lfWeight = 100;
-	//设置背景透明
-	setbkmode(TRANSPARENT);
-	//设置字体样式
-	settextstyle(&font_style);
-	//设置颜色
-	settextcolor(RED);
-	//指定坐标显示
-	outtextxy(pause_x_axis, pause_y_axis, pause_str);
-}
-
-void Frame::draw_game_over() {
-	//存储要显示的字符串
-	static TCHAR pause_str[64];
-	//格式化字符串
-	_stprintf_s(pause_str, _T("游戏结束"));
-	//获取当前字体样式
-	LOGFONT font_style;
-	gettextstyle(&font_style);
-	//更改字体样式
-	font_style.lfHeight = 100;
-	font_style.lfWeight = 100;
-	//设置背景透明
-	setbkmode(TRANSPARENT);
-	//设置字体样式
-	settextstyle(&font_style);
-	//设置颜色
-	settextcolor(RED);
-	//指定坐标显示
-	outtextxy(pause_x_axis, pause_y_axis, pause_str);
-}
-
-void Frame::draw_block_group_png() {
-	putimage(next_group_block_x_axis, next_group_block_y_axis, block_group_png->at(block_group_png_index));
 }
 
 void Frame::rewnew_block_group() {
@@ -593,12 +548,190 @@ void Frame::check_over_map() {
 	}
 }
 
+
+//显示部分
+void Frame::renew_frame() {
+	//清除界面
+	cleardevice();
+
+	//绘制背景
+	draw_backgroud();
+
+	//绘制方块
+	draw_block();
+
+	//绘制得分
+	draw_score();
+
+	//绘制速度
+	draw_speed();
+
+	//绘制关卡
+	draw_level();
+
+	//绘制下一个方块组合的图片
+	draw_block_group_png();
+
+	//绘制一条分界线
+	setlinecolor(RED);
+	line(map_width * Block::block_width, 0, map_width * Block::block_width, map_height * Block::block_height);
+
+	//绘制截止线
+	line(0, 4 * Block::block_height, map_width * Block::block_width, 4 * Block::block_height);
+	setlinecolor(BLACK);
+
+	//游戏是否结束
+	if (!running) {
+		draw_game_over();
+	}
+
+	//游戏是否暂停
+	if (is_pause) {
+		draw_pause();
+	}
+
+	//显示
+	FlushBatchDraw();
+}
+
+void Frame::draw_block() {
+
+	//绘制棋盘本身
+	for (int i = 0; i < map_height; i++) {
+		for (int j = 0; j < map_width; j++) {
+			block[i][j]->show();
+		}
+	}
+
+	//绘制当前下落组合
+	for (auto& x : block_group) {
+		for (auto& y : x) {
+			y->show();
+		}
+	}
+}
+
+void Frame::draw_score() {
+	//存储要显示的字符串
+	static TCHAR score_str[64];
+	//格式化字符串
+	_stprintf_s(score_str, _T("当前得分为：%d"), score);
+	//获取当前字体样式
+	LOGFONT font_style;
+	gettextstyle(&font_style);
+	//更改字体样式
+	font_style.lfHeight = 25;
+	font_style.lfWeight = 25;
+	//设置背景透明
+	setbkmode(TRANSPARENT);
+	//设置字体样式
+	settextstyle(&font_style);
+	//设置颜色
+	settextcolor(RED);
+	//指定坐标显示
+	outtextxy(score_x_axis, score_y_axis, score_str);
+}
+
+void Frame::draw_block_group_png() {
+	putimage(next_group_block_x_axis, next_group_block_y_axis, block_group_png->at(block_group_png_index));
+}
+
+void Frame::draw_speed() {
+	//存储要显示的字符串
+	static TCHAR speed_str[64];
+	//格式化字符串
+	_stprintf_s(speed_str, _T("游戏基础速度：%d"), SPEED);
+	//获取当前字体样式
+	LOGFONT font_style;
+	gettextstyle(&font_style);
+	//更改字体样式
+	font_style.lfHeight = 25;
+	font_style.lfWeight = 25;
+	//设置背景透明
+	setbkmode(TRANSPARENT);
+	//设置字体样式
+	settextstyle(&font_style);
+	//设置颜色
+	settextcolor(RED);
+	//指定坐标显示
+	outtextxy(speed_x_axis, speed_y_aixs, speed_str);
+}
+
+void Frame::draw_level() {
+	//存储要显示的字符串
+	static TCHAR level_str[64];
+	//格式化字符串
+	_stprintf_s(level_str, _T("当前关卡：%d"), level);
+	//获取当前字体样式
+	LOGFONT font_style;
+	gettextstyle(&font_style);
+	//更改字体样式
+	font_style.lfHeight = 25;
+	font_style.lfWeight = 25;
+	//设置背景透明
+	setbkmode(TRANSPARENT);
+	//设置字体样式
+	settextstyle(&font_style);
+	//设置颜色
+	settextcolor(RED);
+	//指定坐标显示
+	outtextxy(level_x_axis, level_y_axis, level_str);
+}
+
+void Frame::draw_pause() {
+	//存储要显示的字符串
+	static TCHAR pause_str[64];
+	//格式化字符串
+	_stprintf_s(pause_str, _T("游戏暂停"));
+	//获取当前字体样式
+	LOGFONT font_style;
+	gettextstyle(&font_style);
+	//更改字体样式
+	font_style.lfHeight = 100;
+	font_style.lfWeight = 100;
+	//设置背景透明
+	setbkmode(TRANSPARENT);
+	//设置字体样式
+	settextstyle(&font_style);
+	//设置颜色
+	settextcolor(RED);
+	//指定坐标显示
+	outtextxy(pause_x_axis, pause_y_axis, pause_str);
+}
+
+void Frame::draw_backgroud() {
+	putimage(0, 0, this->background);
+}
+
+void Frame::draw_game_over() {
+	//存储要显示的字符串
+	static TCHAR pause_str[64];
+	//格式化字符串
+	_stprintf_s(pause_str, _T("游戏结束"));
+	//获取当前字体样式
+	LOGFONT font_style;
+	gettextstyle(&font_style);
+	//更改字体样式
+	font_style.lfHeight = 100;
+	font_style.lfWeight = 100;
+	//设置背景透明
+	setbkmode(TRANSPARENT);
+	//设置字体样式
+	settextstyle(&font_style);
+	//设置颜色
+	settextcolor(RED);
+	//指定坐标显示
+	outtextxy(pause_x_axis, pause_y_axis, pause_str);
+}
+
+
+//方块组合移动和下落部分
 void Frame::block_group_ground() {
 
 	//检查游戏结束
 	check_over_map();
 
-	//检查是否可以消除
+	//检查是否可以消除并消除
 	check_line();
 
 	//释放block_group
@@ -793,6 +926,30 @@ bool Frame::moveToLowestPosition()
 	return true;
 }
 
-void Frame::generate_end_game() {
 
+//生成残局部分
+void Frame::generate_end_game() {
+	//更新残局所需要的参数
+	for (int i = 4; i < map_height; i++) {
+		for (int j = 0; j < map_width; j++) {
+			this->map[i - 4][j] = block[i][j]->is_block;
+			this->blockColors[i - 4][j] = block[i][j]->color;
+		}
+	}
+
+	//创建一个end_game对象
+	EndGame end_game(this->map_height - 4, this->map_width, this->level, this->map, this->blockColors);
+	std::string filename;
+	std::cout << "请输入残局文件名: ";
+	while (std::cin >> filename) {
+		if (end_game.saveToFile(filename)) {
+			std::cout << "创建成功" << std::endl;
+			std::cout << "请继续游戏" << std::endl;
+			break;
+		}
+		else {
+			std::cout << "创建失败，请再试一次" << std::endl;
+			std::cout << "请输入残局文件名: ";
+		}
+	}
 }

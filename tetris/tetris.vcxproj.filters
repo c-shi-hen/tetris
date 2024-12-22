@@ -33,7 +33,7 @@
     <ClCompile Include="Animation.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="ConfigManager.cpp">
+    <ClCompile Include="EndGame.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,7 +53,7 @@
     <ClInclude Include="Animation.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ConfigManager.h">
+    <ClInclude Include="EndGame.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
