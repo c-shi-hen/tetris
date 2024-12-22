@@ -155,6 +155,7 @@ int main() {
             hideConsole();
             begin_frame->menuMsg.createConfig = false;
             begin_frame->initial();
+            flushmessage();
             continue;
         }
 
@@ -201,6 +202,7 @@ int main() {
             // 返回主菜单界面
             begin_frame->menuMsg.loadConfig = false;
             begin_frame->initial();
+            flushmessage();
             continue;
         }
 
@@ -234,6 +236,7 @@ int main() {
             hideConsole();
             begin_frame->menuMsg.createEndGame = false;
             begin_frame->initial();
+            flushmessage();
             continue;
         }
 
@@ -276,7 +279,7 @@ int main() {
             if (is_load) runGame(begin_frame);
             begin_frame->menuMsg.challengeEndGame = false;
             begin_frame->initial();
-
+            flushmessage();
             continue;
         }
         FlushBatchDraw();
