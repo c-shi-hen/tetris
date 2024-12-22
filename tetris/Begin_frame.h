@@ -13,24 +13,15 @@ class Begin_frame
 {
 public:
 
+	/*
+	* @brief 程序开始时，仅初始化一次
+	* @param animation : 图片资源指针
+	*/
 	Begin_frame(Animation* animation);
 	~Begin_frame();
 
-	/*
-	* @brief 初始化游戏主界面
-	*/
-	void initial();
-
-	/*
-	* @brief 默认参数
-	*/
-	void default_param();
-
-	int gameSpeed;
-	int randomSeed;
-	int initialLevel;
-
 public:
+
 	//默认窗口宽度
 	const int begin_frame_width = 800;
 	//默认窗口高度
@@ -47,12 +38,16 @@ public:
 	Animation* animation;
 	IMAGE* background;
 
-	/*
-	* @brief 绘制地图背景
-	*/
-	void inline draw_backgroud();
+	//游戏速度
+	int gameSpeed;
+	//随机种子
+	int randomSeed;
+	//游戏难度
+	int initialLevel;
+	// 存储配置项的键值对
+	std::unordered_map<std::string, std::string> configMap;
 
-public:
+	//消息结构体
 	struct MainMenuMessage {
 		bool startGame = false;
 		bool quitGame = false;
@@ -63,56 +58,102 @@ public:
 	};
 	// 主菜单消息循环
 	MainMenuMessage menuMsg;
-	bool getMainMenuMessage(MainMenuMessage& msg);
 
 public:
-	
+
+	/*
+	* @brief 初始化游戏主界面
+	*/
+	void initial();
+
+	/*
+	* @brief 默认参数
+	*/
+	void default_param();
+
+	/*
+	* @brief 绘制地图背景
+	*/
+	void inline draw_backgroud();
+
 	/*
 	* @brief 绘制菜单
 	*/
 	void inline draw_menu();
 
-	// 加载指定配置文件
+	/*
+	* @brief 获取消息
+	*/
+	bool getMainMenuMessage(MainMenuMessage& msg);
+
+	/*
+	* @brief 加载指定配置文件
+	*/
 	bool loadConfig(const std::string& filename);
 
-	// 保存当前配置到指定文件
+	/*
+	* @brief 保存当前配置到指定文件
+	*/
 	bool saveConfig(const std::string& filename) const;
 
-	// 用户交互：新建配置文件
+	/*
+	* @brief 用户交互：新建配置文件
+	*/
 	bool createConfig(std::string &name);
 
-	// 加载上次使用的配置文件
+	/*
+	* @brief 加载上次使用的配置文件
+	*/
 	bool loadLastConfig();
 
-	// 保存当前配置为上次使用的配置
+	/*
+	* @brief 保存当前配置为上次使用的配置
+	*/
 	bool saveLastConfig() const;
 
-	// 获取某个配置项的值
+	/*
+	* @brief 获取某个配置项的值
+	*/
 	std::optional<std::string> getConfig(const std::string& key) const;
 
-	// 设置某个配置项的值
+	/*
+	* @brief 设置某个配置项的值
+	*/
 	void setConfig(const std::string& key, const std::string& value);
 
-	// 重置为默认配置
+	/*
+	* @brief 重置为默认配置
+	*/
 	void resetToDefault();
 
-	// 验证整个配置是否合法
+	/*
+	* @brief 验证整个配置是否合法
+	*/
 	bool isValid() const;
 
-	// 验证单个键值对是否合法
+	/*
+	* @brief 验证单个键值对是否合法
+	*/
 	bool validateKeyValue(const std::string& key, const std::string& value) const;
 
-	// 初始化默认配置
+	/*
+	* @brief 初始化默认配置
+	*/
 	void initializeDefaults();
 
-	std::unordered_map<std::string, std::string> configMap; // 存储配置项的键值对
-
-public:
-	// 公共方法，用于测试键值对是否合法
+	/*
+	* @brief 公共方法，用于测试键值对是否合法
+	*/
 	bool testValidateKeyValue(const std::string& key, const std::string& value) const;
-	// 判断文件是否存在
+
+	/*
+	* @brief 判断文件是否存在
+	*/
 	bool fileExists(const std::string& filename);
-	// 确认目录存在，如果不存在则创建
+
+	/*
+	* @brief 确认目录存在，如果不存在则创建
+	*/
 	bool createDirectoryIfNotExists(const std::string& path);
 	
 };

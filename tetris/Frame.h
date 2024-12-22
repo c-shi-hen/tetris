@@ -27,80 +27,6 @@ public:
 	*/
 	~Frame();
 
-	/*
-	* @brief 开始游戏
-	*/
-	void game_begin();
-
-	/*
-	* @brief 获得玩家操作信息
-	* @param message 用于存储信息的结构体
-	*/
-	void get_message(ExMessage& message);
-
-
-	/*
-	* @brief 检查是否可以消除
-	*/
-	void check_line();
-
-	/*
-	* @brief 消除满足条件的行，且只下落一次
-	* @param row : 行数
-	*/
-	void erase_line(int row);
-
-	/*
-	*@brief 刷新游戏界面
-	*/
-	void renew_frame();
-
-	/*
-	*@brief 绘制方块
-	*/
-	void draw_block();
-
-	/*
-	*@brief 显示得分
-	*/
-	void draw_score();
-
-	/*
-	*@brief 显示速度
-	*/
-	void draw_speed();
-
-	/*
-	*@brief 显示关卡
-	*/
-	void draw_level();
-
-	/*
-	*@brief 显示下一个方块组合的照片
-	*/
-	void draw_block_group_png();
-
-	// 控制方块移动（左、右、下、最下）
-	bool moveLeft();
-	bool moveRight();
-	bool moveDown();
-	bool moveToLowestPosition();
-
-	// 旋转方块
-	void rotate();
-	/*
-	* @param targetRow : 目标行， targetColumn : 目标列
-	* @brief 检查目标位置是否有碰撞
-	* 以行列偏移量（deltaRow, deltaColumn）为参数，用于在移动或旋转方块之前进行检测。
-	* 当准备向某个方向（左、右、下）移动或在旋转后变换坐标时，
-	* 只需根据新坐标计算出相对于当前坐标的偏移（或新位置），然后调用该函数检查是否有碰撞
-	*/
-	bool checkCollision(int targetRow, int targetColumn);
-
-	//游戏是否正在进行
-	bool running;
-
-
 public:
 
 	//菜单的宽度
@@ -160,7 +86,7 @@ public:
 	//速度坐标
 	int speed_x_axis;
 	int speed_y_aixs;
-	
+
 	//关卡难度坐标
 	int level_x_axis;
 	int level_y_axis;
@@ -170,15 +96,15 @@ public:
 
 	//随机数种子
 	int seed;
-	
+
 	//关卡数
 	int level;
 
 	//残局信息
-	// 地图状态
+	//地图状态
 	std::vector<std::vector<bool>> map;
 	// 方块颜色
-	std::vector<std::vector<int>> blockColors;    
+	std::vector<std::vector<int>> blockColors;
 
 	//主界面指针
 	Begin_frame* begin_frame;
@@ -193,6 +119,94 @@ public:
 	{
 		S, Z, L, J, I, O, T//方块组合，待定，仍可添加，顺序和加载方块图片的顺序一致
 	};
+
+	//游戏是否正在进行
+	bool running;
+
+public:
+	/*
+	* @brief 开始游戏
+	*/
+	void game_begin();
+
+	/*
+	* @brief 获得玩家操作信息
+	* @param message 用于存储信息的结构体
+	*/
+	void get_message(ExMessage& message);
+
+
+	/*
+	* @brief 检查是否可以消除
+	*/
+	void check_line();
+
+	/*
+	* @brief 消除满足条件的行，且只下落一次
+	* @param row : 行数
+	*/
+	void erase_line(int row);
+
+	/*
+	*@brief 刷新游戏界面
+	*/
+	void renew_frame();
+
+	/*
+	*@brief 绘制方块
+	*/
+	void draw_block();
+
+	/*
+	*@brief 显示得分
+	*/
+	void draw_score();
+
+	/*
+	*@brief 显示速度
+	*/
+	void draw_speed();
+
+	/*
+	*@brief 显示关卡
+	*/
+	void draw_level();
+
+	/*
+	*@brief 显示下一个方块组合的照片
+	*/
+	void draw_block_group_png();
+
+	/*
+	*@brief 控制方块移动：左
+	*/
+	bool moveLeft();
+	/*
+	*@brief 控制方块移动：右
+	*/
+	bool moveRight();
+	/*
+	*@brief 控制方块移动：下落
+	*/
+	bool moveDown();
+	/*
+	*@brief 控制方块移动：下落到最底
+	*/
+	bool moveToLowestPosition();
+
+	/*
+	*@brief 旋转方块
+	*/
+	void rotate();
+
+	/*
+	* @param targetRow : 目标行， targetColumn : 目标列
+	* @brief 检查目标位置是否有碰撞
+	* 以行列偏移量（deltaRow, deltaColumn）为参数，用于在移动或旋转方块之前进行检测。
+	* 当准备向某个方向（左、右、下）移动或在旋转后变换坐标时，
+	* 只需根据新坐标计算出相对于当前坐标的偏移（或新位置），然后调用该函数检查是否有碰撞
+	*/
+	bool checkCollision(int targetRow, int targetColumn);
 
 	/*
 	* @brief 绘制地图背景

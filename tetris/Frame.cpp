@@ -96,6 +96,32 @@ Frame::~Frame() {
 
 }
 
+//初始化部分
+void Frame::initial_block() {
+
+	for (int i = 0; i < 4; i++) {
+		std::vector<Block*> block_line;
+		for (int j = 0; j < map_width; j++) {
+			Block* temp = new Block(i, j, &this->animation->block_png);
+			block_line.push_back(temp);
+		}
+		block.push_back(block_line);
+	}
+
+	for (int i = 4; i < map_height; i++) {
+		std::vector<Block*> block_line;
+		for (int j = 0; j < map_width; j++) {
+			Block* temp = new Block(i, j, &this->animation->block_png);
+			temp->is_block = this->map[i - 4][j];
+			temp->color = this->blockColors[i - 4][j];
+			block_line.push_back(temp);
+		}
+		block.push_back(block_line);
+	}
+}
+
+
+//游戏开始与结束
 void Frame::game_begin() {
 
 	//初始化种子
@@ -150,127 +176,7 @@ void Frame::game_over() {
 	renew_frame();
 }
 
-void Frame::generate_block_group() {
-
-	//刷新block_group
-	rewnew_block_group();
-
-	// 生成随机数
-	int block_group_shape;
-	if (seed != -1) {
-		block_group_shape = (int)((double)std::rand() / RAND_MAX * 7);
-	}
-	else {
-		std::random_device rd;  // 用于获取随机数种子
-		std::mt19937 gen(rd()); // Mersenne Twister 19937 演算法生成器
-		// 设置随机数分布范围
-		int start = 0;
-		int end = 6;
-		std::uniform_int_distribution<> dis(start, end); // 均匀分布
-		block_group_shape = dis(gen);
-	}
-
-	//测试用
-	//int block_group_shape = 4;
-
-	//存储下生成的随机数对应的方块组合图片
-	block_group_png_index = block_group_shape;
-
-	//根据随机数生成方块组合
-	switch (block_group_shape) {
-	case S: {
-		int color = BLOCK_GREEN;
-		next_block_group[0][1]->is_block = true;
-		next_block_group[0][1]->color = color;
-		next_block_group[0][2]->is_block = true;
-		next_block_group[0][2]->color = color;
-		next_block_group[1][0]->is_block = true;
-		next_block_group[1][0]->color = color;
-		next_block_group[1][1]->is_block = true;
-		next_block_group[1][1]->color = color;
-		break;
-	}
-	case Z: {
-		int color = BLOCK_BLUE;
-		next_block_group[0][0]->is_block = true;
-		next_block_group[0][0]->color = color;
-		next_block_group[0][1]->is_block = true;
-		next_block_group[0][1]->color = color;
-		next_block_group[1][1]->is_block = true;
-		next_block_group[1][1]->color = color;
-		next_block_group[1][2]->is_block = true;
-		next_block_group[1][2]->color = color;
-		break;
-	}
-	case L: {
-		int color = BLOCK_LIGHT_BLUE;
-		next_block_group[0][0]->is_block = true;
-		next_block_group[0][0]->color = color;
-		next_block_group[1][0]->is_block = true;
-		next_block_group[1][0]->color = color;
-		next_block_group[1][1]->is_block = true;
-		next_block_group[1][1]->color = color;
-		next_block_group[1][2]->is_block = true;
-		next_block_group[1][2]->color = color;
-		break;
-	}
-	case J: {
-		int color = BLOCK_ORANGE;
-		next_block_group[0][2]->is_block = true;
-		next_block_group[0][2]->color = color;
-		next_block_group[1][0]->is_block = true;
-		next_block_group[1][0]->color = color;
-		next_block_group[1][1]->is_block = true;
-		next_block_group[1][1]->color = color;
-		next_block_group[1][2]->is_block = true;
-		next_block_group[1][2]->color = color;
-		break;
-	}
-
-	case I: {
-		int color = BLOCK_PURPLE;
-		next_block_group[0][1]->is_block = true;
-		next_block_group[0][1]->color = color;
-		next_block_group[1][1]->is_block = true;
-		next_block_group[1][1]->color = color;
-		next_block_group[2][1]->is_block = true;
-		next_block_group[2][1]->color = color;
-		next_block_group[3][1]->is_block = true;
-		next_block_group[3][1]->color = color;
-		break;
-	}
-	case O: {
-		int color = BLOCK_YELLOW;
-		next_block_group[0][1]->is_block = true;
-		next_block_group[0][1]->color = color;
-		next_block_group[0][2]->is_block = true;
-		next_block_group[0][2]->color = color;
-		next_block_group[1][1]->is_block = true;
-		next_block_group[1][1]->color = color;
-		next_block_group[1][2]->is_block = true;
-		next_block_group[1][2]->color = color;
-		break;
-	}
-	case T: {
-		int color = BLOCK_GREEN;
-		next_block_group[0][0]->is_block = true;
-		next_block_group[0][0]->color = color;
-		next_block_group[0][1]->is_block = true;
-		next_block_group[0][1]->color = color;
-		next_block_group[0][2]->is_block = true;
-		next_block_group[0][2]->color = color;
-		next_block_group[1][1]->is_block = true;
-		next_block_group[1][1]->color = color;
-		break;
-	}
-	default:
-		//程序出错，直接退出
-		std::cout << "未能生成新方块，随机数种子出错" << std::endl;
-		exit(0);
-		break;
-	}
-}
-
+//获取消息部分
 void Frame::get_message(ExMessage& message) {
 
 	int timer = 0;
@@ -421,6 +327,129 @@ void Frame::get_message(ExMessage& message) {
 
 }
 
+
+//方块组合生成、下落、检查消除、检查结束
+void Frame::generate_block_group() {
+
+	//刷新block_group
+	rewnew_block_group();
+
+	// 生成随机数
+	int block_group_shape;
+	if (seed != -1) {
+		block_group_shape = (int)((double)std::rand() / RAND_MAX * 7);
+	}
+	else {
+		std::random_device rd;  // 用于获取随机数种子
+		std::mt19937 gen(rd()); // Mersenne Twister 19937 演算法生成器
+		// 设置随机数分布范围
+		int start = 0;
+		int end = 6;
+		std::uniform_int_distribution<> dis(start, end); // 均匀分布
+		block_group_shape = dis(gen);
+	}
+
+	//测试用
+	//int block_group_shape = 4;
+
+	//存储下生成的随机数对应的方块组合图片
+	block_group_png_index = block_group_shape;
+
+	//根据随机数生成方块组合
+	switch (block_group_shape) {
+	case S: {
+		int color = BLOCK_GREEN;
+		next_block_group[0][1]->is_block = true;
+		next_block_group[0][1]->color = color;
+		next_block_group[0][2]->is_block = true;
+		next_block_group[0][2]->color = color;
+		next_block_group[1][0]->is_block = true;
+		next_block_group[1][0]->color = color;
+		next_block_group[1][1]->is_block = true;
+		next_block_group[1][1]->color = color;
+		break;
+	}
+	case Z: {
+		int color = BLOCK_BLUE;
+		next_block_group[0][0]->is_block = true;
+		next_block_group[0][0]->color = color;
+		next_block_group[0][1]->is_block = true;
+		next_block_group[0][1]->color = color;
+		next_block_group[1][1]->is_block = true;
+		next_block_group[1][1]->color = color;
+		next_block_group[1][2]->is_block = true;
+		next_block_group[1][2]->color = color;
+		break;
+	}
+	case L: {
+		int color = BLOCK_LIGHT_BLUE;
+		next_block_group[0][0]->is_block = true;
+		next_block_group[0][0]->color = color;
+		next_block_group[1][0]->is_block = true;
+		next_block_group[1][0]->color = color;
+		next_block_group[1][1]->is_block = true;
+		next_block_group[1][1]->color = color;
+		next_block_group[1][2]->is_block = true;
+		next_block_group[1][2]->color = color;
+		break;
+	}
+	case J: {
+		int color = BLOCK_ORANGE;
+		next_block_group[0][2]->is_block = true;
+		next_block_group[0][2]->color = color;
+		next_block_group[1][0]->is_block = true;
+		next_block_group[1][0]->color = color;
+		next_block_group[1][1]->is_block = true;
+		next_block_group[1][1]->color = color;
+		next_block_group[1][2]->is_block = true;
+		next_block_group[1][2]->color = color;
+		break;
+	}
+
+	case I: {
+		int color = BLOCK_PURPLE;
+		next_block_group[0][1]->is_block = true;
+		next_block_group[0][1]->color = color;
+		next_block_group[1][1]->is_block = true;
+		next_block_group[1][1]->color = color;
+		next_block_group[2][1]->is_block = true;
+		next_block_group[2][1]->color = color;
+		next_block_group[3][1]->is_block = true;
+		next_block_group[3][1]->color = color;
+		break;
+	}
+	case O: {
+		int color = BLOCK_YELLOW;
+		next_block_group[0][1]->is_block = true;
+		next_block_group[0][1]->color = color;
+		next_block_group[0][2]->is_block = true;
+		next_block_group[0][2]->color = color;
+		next_block_group[1][1]->is_block = true;
+		next_block_group[1][1]->color = color;
+		next_block_group[1][2]->is_block = true;
+		next_block_group[1][2]->color = color;
+		break;
+	}
+	case T: {
+		int color = BLOCK_GREEN;
+		next_block_group[0][0]->is_block = true;
+		next_block_group[0][0]->color = color;
+		next_block_group[0][1]->is_block = true;
+		next_block_group[0][1]->color = color;
+		next_block_group[0][2]->is_block = true;
+		next_block_group[0][2]->color = color;
+		next_block_group[1][1]->is_block = true;
+		next_block_group[1][1]->color = color;
+		break;
+	}
+	default:
+		//程序出错，直接退出
+		std::cout << "未能生成新方块，随机数种子出错" << std::endl;
+		exit(0);
+		break;
+	}
+}
+
 void Frame::check_line() {
 	//检测是否可以消除
 	bool is_erase = true;
@@ -471,33 +500,53 @@ void Frame::erase_line(int row) {
 	}
 }
 
-void Frame::draw_backgroud() {
-	putimage(0, 0, this->background);
-}
-
-void Frame::initial_block() {
-
+void Frame::rewnew_block_group() {
 	for (int i = 0; i < 4; i++) {
-		std::vector<Block*> block_line;
-		for (int j = 0; j < map_width; j++) {
+		std::vector<Block*> temp_line;
+		for (int j = map_width / 2 - 1; j < map_width / 2 + 3; j++) {
 			Block* temp = new Block(i, j, &this->animation->block_png);
-			block_line.push_back(temp);
+			temp->is_block = false;
+			temp_line.push_back(temp);
 		}
-		block.push_back(block_line);
-	}
-
-	for (int i = 4; i < map_height; i++) {
-		std::vector<Block*> block_line;
-		for (int j = 0; j < map_width; j++) {
-			Block* temp = new Block(i, j, &this->animation->block_png);
-			temp->is_block = this->map[i - 4][j];
-			temp->color = this->blockColors[i - 4][j];
-			block_line.push_back(temp);
-		}
-		block.push_back(block_line);
+		next_block_group.push_back(temp_line);
 	}
 }
 
+void Frame::delete_block_group() {
+	for (int i = 0; i < block_group.size(); i++) {
+		for (int j = 0; j < block_group[i].size(); j++) {
+			delete block_group[i][j];
+		}
+		block_group[i].clear();
+	}
+	block_group.clear();
+}
+
+void Frame::trans_block_group() {
+	for (int i = 0; i < next_block_group.size(); i++) {
+		std::vector<Block*> temp_line;
+		for (int j = 0; j < next_block_group[i].size(); j++) {
+			temp_line.push_back(next_block_group[i][j]);
+		}
+		block_group.push_back(temp_line);
+	}
+	//传递之后自身被清空
+	next_block_group.clear();
+}
+
+void Frame::check_over_map() {
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < map_width; j++) {
+			//查找出现溢出
+			if (block[i][j]->is_block == true) {
+				game_over();
+			}
+		}
+	}
+}
+
+
+//显示部分
 void Frame::renew_frame() {
 	//清除界面
 	cleardevice();
@@ -580,6 +629,10 @@ void Frame::draw_score() {
 	outtextxy(score_x_axis, score_y_axis, score_str);
 }
 
+void Frame::draw_block_group_png() {
+	putimage(next_group_block_x_axis, next_group_block_y_axis, block_group_png->at(block_group_png_index));
+}
+
 void Frame::draw_speed() {
 	//存储要显示的字符串
 	static TCHAR speed_str[64];
@@ -643,6 +696,10 @@ void Frame::draw_pause() {
 	outtextxy(pause_x_axis, pause_y_axis, pause_str);
 }
 
+void Frame::draw_backgroud() {
+	putimage(0, 0, this->background);
+}
+
 void Frame::draw_game_over() {
 	//存储要显示的字符串
 	static TCHAR pause_str[64];
@@ -664,55 +721,8 @@ void Frame::draw_game_over() {
 	outtextxy(pause_x_axis, pause_y_axis, pause_str);
 }
 
-void Frame::draw_block_group_png() {
-	putimage(next_group_block_x_axis, next_group_block_y_axis, block_group_png->at(block_group_png_index));
-}
 
-void Frame::rewnew_block_group() {
-	for (int i = 0; i < 4; i++) {
-		std::vector<Block*> temp_line;
-		for (int j = map_width / 2 - 1; j < map_width / 2 + 3; j++) {
-			Block* temp = new Block(i, j, &this->animation->block_png);
-			temp->is_block = false;
-			temp_line.push_back(temp);
-		}
-		next_block_group.push_back(temp_line);
-	}
-}
-
-void Frame::delete_block_group() {
-	for (int i = 0; i < block_group.size(); i++) {
-		for (int j = 0; j < block_group[i].size(); j++) {
-			delete block_group[i][j];
-		}
-		block_group[i].clear();
-	}
-	block_group.clear();
-}
-
-void Frame::trans_block_group() {
-	for (int i = 0; i < next_block_group.size(); i++) {
-		std::vector<Block*> temp_line;
-		for (int j = 0; j < next_block_group[i].size(); j++) {
-			temp_line.push_back(next_block_group[i][j]);
-		}
-		block_group.push_back(temp_line);
-	}
-	//传递之后自身被清空
-	next_block_group.clear();
-}
-
-void Frame::check_over_map() {
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < map_width; j++) {
-			//查找出现溢出
-			if (block[i][j]->is_block == true) {
-				game_over();
-			}
-		}
-	}
-}
-
+//方块组合移动和下落部分
 void Frame::block_group_ground() {
 
 	//检查游戏结束
@@ -913,6 +923,8 @@ bool Frame::moveToLowestPosition()
 	return true;
 }
 
+
+//生成残局部分
 void Frame::generate_end_game() {
 	//更新残局所需要的参数
 	for (int i = 4; i < map_height; i++) {

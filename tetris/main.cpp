@@ -10,7 +10,6 @@
 
 namespace fs = std::filesystem;
 
-
 // 显示控制台
 void showConsole() {
     AllocConsole();  // 分配控制台窗口
@@ -49,7 +48,6 @@ void showConsole() {
 // 隐藏控制台
 void hideConsole() {
 
-
     // 隐藏控制台
     ShowWindow(GetConsoleWindow(), SW_HIDE);
 }
@@ -77,7 +75,6 @@ void runGame(Begin_frame* begin_frame) {
 
     delete(myFrame);
 }
-
 
 int main() {
     // 确保 config 和 endgames 目录存在
@@ -107,7 +104,7 @@ int main() {
         // 获取用户输入
         begin_frame->getMainMenuMessage(begin_frame->menuMsg);
 
-        /// 开始游戏
+        // 开始游戏
         if (begin_frame->menuMsg.startGame) {
             EndBatchDraw();
             closegraph();

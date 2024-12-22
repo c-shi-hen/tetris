@@ -20,7 +20,6 @@ Begin_frame::Begin_frame(Animation* animation) {
 
 }
 
-
 Begin_frame::~Begin_frame()
 {
 }
@@ -76,11 +75,9 @@ void Begin_frame::initial() {
     default_param();
 }
 
-
 void inline Begin_frame::draw_backgroud() {
 	putimage(0, 0, background);
 }
-
 
 void Begin_frame::draw_menu() {
 
@@ -115,7 +112,6 @@ void Begin_frame::draw_menu() {
 
 }
 
-// 获取主菜单消息
 bool Begin_frame::getMainMenuMessage(MainMenuMessage& msg) {
     ExMessage message;
     while (peekmessage(&message)) {
@@ -145,7 +141,6 @@ bool Begin_frame::getMainMenuMessage(MainMenuMessage& msg) {
     return false;
 }
 
-//检查文件是否存在
 bool Begin_frame::fileExists(const std::string& filename) {
     try {
         return fs::exists(filename);
@@ -156,7 +151,6 @@ bool Begin_frame::fileExists(const std::string& filename) {
     }
 }
 
-// 确认目录存在，如果不存在则创建
 bool Begin_frame::createDirectoryIfNotExists(const std::string& path) {
     try {
         if (fs::create_directories(path)) {
@@ -170,14 +164,12 @@ bool Begin_frame::createDirectoryIfNotExists(const std::string& path) {
     }
 }
 
-// 初始化默认配置
 void Begin_frame::initializeDefaults() {
     gameSpeed = 5;
     randomSeed = -1;
     initialLevel= 1;
 }
 
-// 加载指定配置文件
 bool Begin_frame::loadConfig(const std::string& filename) {
     try {
         if (!fileExists(filename)) {
@@ -237,7 +229,6 @@ bool Begin_frame::loadConfig(const std::string& filename) {
     }
 }
 
-// 保存当前配置到指定文件
 bool Begin_frame::saveConfig(const std::string& filename) const {
     try {
         std::ofstream outfile(filename);
@@ -259,7 +250,6 @@ bool Begin_frame::saveConfig(const std::string& filename) const {
     }
 }
 
-// 用户交互：新建配置文件
 bool Begin_frame::createConfig(std::string &name) {
 
     std::regex validName("^[A-Za-z0-9_]+$");
@@ -350,14 +340,11 @@ bool Begin_frame::createConfig(std::string &name) {
     
 }
 
-
-// 保存当前配置为上次使用的配置
 bool Begin_frame::saveLastConfig() const {
     const std::string lastConfigPath = "config/last.config";
     return saveConfig(lastConfigPath);
 }
 
-// 获取某个配置项的值
 std::optional<std::string> Begin_frame::getConfig(const std::string& key) const {
     auto it = configMap.find(key);
     if (it != configMap.end()) {
@@ -366,7 +353,6 @@ std::optional<std::string> Begin_frame::getConfig(const std::string& key) const 
     return std::nullopt;
 }
 
-// 设置某个配置项的值
 void Begin_frame::setConfig(const std::string& key, const std::string& value) {
     if (validateKeyValue(key, value)) {
         configMap[key] = value;
@@ -376,12 +362,10 @@ void Begin_frame::setConfig(const std::string& key, const std::string& value) {
     }
 }
 
-// 重置为默认配置
 void Begin_frame::resetToDefault() {
     initializeDefaults();
 }
 
-// 验证整个配置是否合法
 bool Begin_frame::isValid() const {
     for (const auto& [key, value] : configMap) {
         if (!validateKeyValue(key, value)) {
@@ -391,7 +375,6 @@ bool Begin_frame::isValid() const {
     return true;
 }
 
-// 验证单个键值对是否合法
 bool Begin_frame::validateKeyValue(const std::string& key, const std::string& value) const {
     if (key == "gameSpeed") {
         int speed = std::stoi(value);
@@ -411,7 +394,6 @@ bool Begin_frame::testValidateKeyValue(const std::string& key, const std::string
     return validateKeyValue(key, value);
 }
 
-//检查对应目录下是否存在last.config文件，若不存在，则创建并设为默认值
 bool Begin_frame::loadLastConfig() {
     const std::string lastConfigPath = "config/last.config";
 

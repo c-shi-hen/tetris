@@ -17,6 +17,10 @@ EndGame::EndGame(Animation* animation) {
     this->animation = animation;
 }
 
+EndGame::~EndGame() {
+
+}
+
 bool EndGame::isValid() const {
     return (mapWidth >= 8 && mapWidth <= 20) &&
         (mapHeight >= 8 && mapHeight <= 20) &&
@@ -25,8 +29,6 @@ bool EndGame::isValid() const {
         (blockColors.size() == static_cast<size_t>(mapHeight)) &&
         (mapWidth == blockColors[0].size());
 }
-
-
 
 void EndGame::visualizeEndGame() {
     // 初始化图形窗口的大小
@@ -95,9 +97,6 @@ void EndGame::visualizeEndGame() {
 
     FlushBatchDraw();
 }
-
-
-
 
 bool EndGame::createEndGame(std::string &endGameName) {
 
@@ -177,7 +176,7 @@ bool EndGame::createEndGame(std::string &endGameName) {
             }
         }
         else if (cmd == "f") {
-            std::string filePath = "endgames/" + endGameName + ".end";
+            std::string filePath = endGameName;
             if (saveToFile(filePath)) {
                 std::cout << "残局保存成功: " << filePath << std::endl;
                 closegraph(); // 关闭图形界面

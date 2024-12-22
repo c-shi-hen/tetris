@@ -6,7 +6,16 @@ Animation::Animation() {
 }
 
 Animation::~Animation(){
+	
+	//释放方块图片内存
+	for (int i = 0; i < block_png.size(); i++) {
+		delete block_png[i];
+	}
 
+	//释放方块组合图片内存
+	for (int i = 0; i < block_group_png.size(); i++) {
+		delete block_group_png[i];
+	}
 }
 
 void Animation::load_block_png() {
