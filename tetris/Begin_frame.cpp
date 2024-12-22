@@ -246,9 +246,10 @@ bool Begin_frame::saveConfig(const std::string& filename) const {
             return false;
         }
 
-        for (const auto& [key, value] : configMap) {
-            outfile << key << "=" << value << "\n";
-        }
+        outfile << gameSpeed << "\n";
+        outfile << initialLevel << "\n";
+        outfile << randomSeed << "\n";
+
         outfile.close();
         return true;
     }
