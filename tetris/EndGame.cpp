@@ -99,15 +99,7 @@ void EndGame::visualizeEndGame() {
 
 
 
-bool EndGame::createEndGame() {
-    std::string endGameName;
-    std::cout << "请输入残局文件名称（仅限英文字母、数字和下划线，输入 'q' 取消）：";
-    std::cin >> endGameName;
-
-    if (endGameName == "q") {
-        std::cout << "取消创建残局。" << std::endl;
-        return false;
-    }
+bool EndGame::createEndGame(std::string &endGameName) {
 
     std::regex validNameRegex("^[A-Za-z0-9_]+$");
     if (!std::regex_match(endGameName, validNameRegex)) {

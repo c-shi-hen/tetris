@@ -134,15 +134,26 @@ int main() {
         if (begin_frame->menuMsg.createConfig) {
             showConsole();
             EndBatchDraw();
-            
             closegraph();
-            if (begin_frame->createConfig()) {
-                std::cout << "新配置创建成功。" << std::endl;
+
+            std::string filename;
+            std::cout << "请输入新配置文件名称（仅限字母、数字和下划线，输入 'q' 退出）：";
+            while (std::cin >> filename) {
+                if (filename == "q") {
+                    std::cout << "取消新建配置。\n";
+                    break;
+                }
+                else {
+                    if (begin_frame->createConfig(filename)) {
+                        std::cout << "新配置创建成功。" << std::endl;
+                    }
+                    else {
+                        std::cout << "新配置创建失败，请再试一次。" << std::endl;
+                    }
+                }
+                std::cout << "请输入新配置文件名称（仅限字母、数字和下划线，输入 'q' 退出）：";
             }
-            else {
-                std::cout << "新配置创建失败或取消。" << std::endl;
-                
-            }
+
             // 返回主菜单界面
             hideConsole();
             begin_frame->menuMsg.createConfig = false;
@@ -202,13 +213,25 @@ int main() {
             EndBatchDraw();
             closegraph();
             
-            EndGame endGame(animation); // 传递 Animation 对象
-            if (endGame.createEndGame()) {
-                std::cout << "残局创建完成。" << std::endl;
+            std::string filename;
+            std::cout << "请输入残局文件名称（仅限英文字母、数字和下划线，输入 'q' 取消）：";
+            while (std::cin >> filename) {
+                if (filename == "q") {
+                    std::cout << "取消创建残局。" << std::endl;
+                    break;
+                }
+                else {
+                    EndGame endGame(animation); // 传递 Animation 对象
+                    if (endGame.createEndGame(filename)) {
+                        std::cout << "残局创建完成。" << std::endl;
+                    }
+                    else {
+                        std::cout << "残局创建失败，请再试一次。" << std::endl;
+                    }
+                }
+                std::cout << "请输入要加载的配置文件名（不包括路径,后缀，直接输入文件名，输入 'q' 退出）：";
             }
-            else {
-                std::cout << "残局创建失败或取消。" << std::endl;
-            }
+            
 
             // 返回主菜单界面
             hideConsole();

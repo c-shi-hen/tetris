@@ -79,7 +79,7 @@ public:
 	bool saveConfig(const std::string& filename) const;
 
 	// 用户交互：新建配置文件
-	bool createConfig();
+	bool createConfig(std::string &name);
 
 	// 加载上次使用的配置文件
 	bool loadLastConfig();

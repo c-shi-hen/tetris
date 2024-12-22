@@ -259,16 +259,7 @@ bool Begin_frame::saveConfig(const std::string& filename) const {
 }
 
 // 用户交互：新建配置文件
-bool Begin_frame::createConfig() {
-   
-    std::string name;
-    std::cout << "请输入新配置文件名称（仅限字母、数字和下划线，输入 'q' 退出）：";
-    std::cin >> name;
-
-    if (name == "q") {
-        std::cout << "取消新建配置。\n";
-        return false;
-    }
+bool Begin_frame::createConfig(std::string &name) {
 
     std::regex validName("^[A-Za-z0-9_]+$");
     if (!std::regex_match(name, validName)) {

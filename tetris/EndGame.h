@@ -29,7 +29,7 @@ public:
     EndGame(Animation* animation);
 
     // 创建残局
-    bool createEndGame();
+    bool createEndGame(std::string &endGameName);
 
     // 保存残局到文件
     bool saveToFile(const std::string& filename) const;
