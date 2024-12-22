@@ -32,7 +32,7 @@ public:
 	//方块颜色
 	int color;
 
-private:
+
 	//存储方块图片
 	std::vector<IMAGE*>* block_png;
 

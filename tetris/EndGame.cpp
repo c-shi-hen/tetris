@@ -26,21 +26,51 @@ bool EndGame::isValid() const {
         (mapWidth == blockColors[0].size());
 }
 
+
+
 void EndGame::visualizeEndGame() {
-    // 初始化图形窗口
+    // 初始化图形窗口的大小
     int blockWidth = Block::block_width;
     int blockHeight = Block::block_height;
     int windowWidth = mapWidth * blockWidth;
     int windowHeight = mapHeight * blockHeight;
 
-    // 初始化窗口
-    initgraph(windowWidth, windowHeight);
-    SetWindowText(GetHWnd(), L"残局地图编辑器");
+    // 初始化图形窗口
+    HWND hwnd = initgraph(windowWidth, windowHeight);
+    SetWindowText(hwnd, L"残局地图编辑器");
 
+    // 获取屏幕的宽度和高度
+    RECT desktopRect;
+    GetWindowRect(GetDesktopWindow(), &desktopRect);
+    int screenWidth = desktopRect.right;
+    int screenHeight = desktopRect.bottom;
+
+    // 设置图形窗口的位置，靠屏幕左边，垂直居中
+    int windowX = 35;  // 距离屏幕左边 35 像素
+    int windowY = (screenHeight - windowHeight) / 2; // 垂直居中
+
+    SetWindowPos(hwnd, HWND_TOP, windowX, windowY, 0, 0, SWP_NOSIZE | SWP_NOZORDER);
+
+    // 显示并调整控制台窗口
+    HWND consoleWnd = GetConsoleWindow();
+    ShowWindow(consoleWnd, SW_SHOWNORMAL); // 确保控制台窗口可见
+
+    // 设置控制台窗口的位置和大小
+    int consoleWidth = screenWidth / 3;  // 设置控制台宽度为屏幕宽度的三分之一
+    int consoleHeight = screenHeight / 2; // 设置控制台高度为屏幕高度的一半
+    int consoleX = screenWidth - consoleWidth - 10; // 控制台位于屏幕右侧，距离右边框10像素
+    int consoleY = (screenHeight - consoleHeight) / 2; // 控制台垂直居中
+
+    // 调整控制台窗口的位置和大小
+    SetWindowPos(consoleWnd, HWND_TOP, consoleX, consoleY, consoleWidth, consoleHeight, SWP_NOZORDER);
+
+
+
+    // 开始绘制内容
     cleardevice();
 
     // 绘制背景
-    putimage(0, 0, &animation->back_ground); // 直接使用 &animation->back_ground
+    putimage(0, 0, &animation->back_ground);
 
     // 绘制每个方块
     for (int row = 0; row < mapHeight; ++row) {
@@ -65,6 +95,9 @@ void EndGame::visualizeEndGame() {
 
     FlushBatchDraw();
 }
+
+
+
 
 bool EndGame::createEndGame() {
     std::string endGameName;
@@ -131,6 +164,7 @@ bool EndGame::createEndGame() {
                 blockColors[y - 1][x - 1] = type - '0';
 
                 visualizeEndGame(); // 更新界面
+
             }
             else {
                 std::cout << "位置超出范围！" << std::endl;
@@ -144,6 +178,7 @@ bool EndGame::createEndGame() {
                 blockColors[y - 1][x - 1] = -1;
 
                 visualizeEndGame(); // 更新界面
+
             }
             else {
                 std::cout << "位置超出范围！" << std::endl;

@@ -37,6 +37,14 @@ void Begin_frame::default_param() {
     this->gameSpeed = 1;
     this->initialLevel = 1;
 
+    // 默认加载 last.config
+    if (!this->loadLastConfig()) {
+        std::cout << "未能加载 last.config，将使用默认配置。" << std::endl;
+    }
+    else {
+        std::cout << "成功加载 last.config。" << std::endl;
+    }
+
     for (int i = 0; i < map_height; i++) {
         std::vector<bool> temp_map_line;
         std::vector<int> temp_color_line;
@@ -308,14 +316,11 @@ bool Begin_frame::createConfig() {
     
 }
 
-// 加载上次使用的配置
-bool Begin_frame::loadLastConfig() {
-    return loadConfig("config/last.config");
-}
 
 // 保存当前配置为上次使用的配置
 bool Begin_frame::saveLastConfig() const {
-    return saveConfig("config/last.config");
+    const std::string lastConfigPath = "config/last.config";
+    return saveConfig(lastConfigPath);
 }
 
 // 获取某个配置项的值
@@ -370,4 +375,26 @@ bool Begin_frame::validateKeyValue(const std::string& key, const std::string& va
 
 bool Begin_frame::testValidateKeyValue(const std::string& key, const std::string& value) const {
     return validateKeyValue(key, value);
+}
+
+//检查对应目录下是否存在last.config文件，若不存在，则创建并设为默认值
+bool Begin_frame::loadLastConfig() {
+    const std::string lastConfigPath = "config/last.config";
+
+    // 检查 last.config 文件是否存在
+    if (!fileExists(lastConfigPath)) {
+        std::cout << "last.config 文件不存在，将创建默认配置。" << std::endl;
+
+        // 创建默认配置
+        gameSpeed = 5;         // 默认游戏速度
+        initialLevel = 1;      // 默认初始关卡
+        randomSeed = -1;       // 默认随机种子
+        saveConfig(lastConfigPath); // 保存默认配置到 last.config
+
+        return true;
+    }
+
+    // 如果存在，加载配置
+    std::cout << "正在加载 last.config 文件..." << std::endl;
+    return loadConfig(lastConfigPath);
 }

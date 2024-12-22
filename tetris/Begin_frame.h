@@ -114,5 +114,6 @@ public:
 	bool fileExists(const std::string& filename);
 	// 确认目录存在，如果不存在则创建
 	bool createDirectoryIfNotExists(const std::string& path);
+	
 };
 
