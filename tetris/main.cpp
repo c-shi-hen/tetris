@@ -49,7 +49,7 @@ void showConsole() {
 // 隐藏控制台
 void hideConsole() {
 
-    Sleep(1500);
+
     // 隐藏控制台
     ShowWindow(GetConsoleWindow(), SW_HIDE);
 }

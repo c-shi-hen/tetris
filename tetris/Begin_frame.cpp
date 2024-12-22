@@ -272,22 +272,64 @@ bool Begin_frame::createConfig(std::string &name) {
     int gameSpeed, initialLevel;
     int randomSeed;
 
-    std::cout << "请输入游戏速度 (1-10)：";
+    /*std::cout << "请输入游戏速度 (1-10)：";
     std::cin >> gameSpeed;
     if (gameSpeed < 1 || gameSpeed > 10) {
         std::cout << "无效的游戏速度值，必须在 1-10 之间。\n";
         return false;
+    }*/
+
+    while (true) {
+        std::cout << "请输入游戏速度 (1-10)：";
+        std::cin >> gameSpeed;
+        if (std::cin.fail() || gameSpeed < 1 || gameSpeed > 10) {
+            std::cin.clear();
+            std::cin.ignore(10000, '\n');
+            std::cout << "无效的游戏速度值，必须在 1-10 之间。\n";
+        }
+        else {
+            break;
+        }
+       
     }
 
-    std::cout << "请输入初始关卡 (>= 1)：";
+    /*std::cout << "请输入初始关卡 (>= 1)：";
     std::cin >> initialLevel;
     if (initialLevel < 1) {
         std::cout << "无效的初始关卡值，必须大于等于 1。\n";
         return false;
+    }*/
+
+    while (true) {
+        std::cout << "请输入初始关卡 (>= 1)：";
+        std::cin >> initialLevel;
+        if (std::cin.fail() || initialLevel < 1) {
+            std::cin.clear();
+            std::cin.ignore(10000, '\n');
+            std::cout << "无效的初始关卡值，必须大于等于 1。\n";
+        }
+        else {
+            break;
+        }
+
     }
 
-    std::cout << "请输入随机种子值（整数，输入 -1 表示随机）：";
-    std::cin >> randomSeed;
+    /* td::cout << "请输入随机种子值（整数，输入 -1 表示随机）：";
+    std::cin >> randomSeed;*/
+
+    while (true) {
+        std::cout << "请输入随机种子值（整数，输入 -1 表示随机）：";
+        std::cin >> randomSeed;
+        if (std::cin.fail() ) {
+            std::cin.clear();
+            std::cin.ignore(10000, '\n');
+            std::cout << "无效的随机种子值\n";
+        }
+        else {
+            break;
+        }
+
+    }
 
     // 将这些值写入配置文件
     std::string filename = "config/" + name + ".config";
