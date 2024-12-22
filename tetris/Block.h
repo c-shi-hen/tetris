@@ -23,10 +23,10 @@ public:
 	~Block();
 
 public:
-	//方块宽度
+	//方块宽度，由方块的图片决定
 	const static int block_width = 30;
 
-	//方块高度
+	//方块高度，由方块的图片决定
 	const static int block_height = 30;
 
 	//方块所在排数
