@@ -274,9 +274,9 @@ void Frame::generate_block_group() {
 void Frame::get_message(ExMessage& message) {
 
 	int timer = 0;
+	int temp_speed = SPEED + level;
 	while (running) {
 
-		int temp_speed = SPEED + level;
 		timer++;
 		//动态延时优化性能，保证每次循环执行的时间高于帧率
 		//开始时间
