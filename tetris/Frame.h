@@ -1,9 +1,8 @@
-#pragma once
 #include <wtypes.h>
 #include"Block.h"
 #include <vector>
-#include"Animation.h"
 #include"Begin_frame.h"
+#include"Animation.h"
 
 #define VK_W 0x57
 #define VK_S 0x53

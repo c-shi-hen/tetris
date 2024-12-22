@@ -1,5 +1,4 @@
 #include"Frame.h"
-#include"Block.h"
 #include<random>
 #include<iostream>
 #include"EndGame.h"
@@ -248,7 +247,9 @@ void Frame::get_message(ExMessage& message) {
 				case VK_S: {
 					is_down = false;
 					//松下按键后刷新速度
+
 					temp_speed = SPEED + level;
+
 					break;
 				}
 				case VK_A: {
@@ -289,7 +290,9 @@ void Frame::get_message(ExMessage& message) {
 				is_up = false;
 				renew_frame();
 			}
+
 			if (is_down && temp_speed <= 50) temp_speed++;
+
 			if (is_space) {
 				moveToLowestPosition();
 				is_space = false;
